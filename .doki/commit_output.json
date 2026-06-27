@@ -1,27 +1,27 @@
 {
-  "FullMessage": "Squizzles Fall: FinalizeCommit staged nichts mehr AssembleCommit\u2026\n\nSquizzle untersucht die Spur. Thinker hatte die Hook-Architektur analysiert, weil DokiExecutable den dotnet-Host statt den DOKI-Binary zurueckgab, deshalb wurde nicht nur der Hook gefixt sondern auch die Finalize-Logik umstrukturiert. FinalizeCommit schreibt jetzt nur noch auf Platte, weil die Hash-Ersetzungen den echten Commit-Hash brauchen der erst nach git commit existiert. Deshalb uebernimmt AssembleCommit das Staging von narrative_chain und lore_arcs zusammen mit CHANGELOG und change_index, damit jeder Commit den vollstaendigen DOKI-Zustand enthaelt. Kein dirty state, kein nachziehender Cleanup-Commit, keine Ausnahme. CHANGELOG wird aktualisiert und Change-Index bleibt stabil weil keine CSharp-Dateien geandert wurden.\n---\n[NARRATOR:Squizzle] [MODEL:cursor-agent] [IMPULSE:FinalizeCommit staged nichts mehr AssembleCommit uebernimmt] [COMPOSITE:c5j86n5a1p4] [PREV_NARRATOR:Thinker] [PREV_MODEL:cursor-agent]\n",
-  "Subject": "Squizzles Fall: FinalizeCommit staged nichts mehr AssembleCommit\u2026",
-  "Body": "Squizzle untersucht die Spur. Thinker hatte die Hook-Architektur analysiert, weil DokiExecutable den dotnet-Host statt den DOKI-Binary zurueckgab, deshalb wurde nicht nur der Hook gefixt sondern auch die Finalize-Logik umstrukturiert. FinalizeCommit schreibt jetzt nur noch auf Platte, weil die Hash-Ersetzungen den echten Commit-Hash brauchen der erst nach git commit existiert. Deshalb uebernimmt AssembleCommit das Staging von narrative_chain und lore_arcs zusammen mit CHANGELOG und change_index, damit jeder Commit den vollstaendigen DOKI-Zustand enthaelt. Kein dirty state, kein nachziehender Cleanup-Commit, keine Ausnahme. CHANGELOG wird aktualisiert und Change-Index bleibt stabil weil keine CSharp-Dateien geandert wurden.",
-  "ChangelogEntry": "### [2026-06-26 07:00:00] FinalizeCommit staged nichts mehr AssembleCommit uebernimmt\n**Narrator:** Squizzle | **Model:** cursor-agent | **Composite:** \u0060c5j86n5a1p4\u0060\n- 0 Datei(en) ge\u00E4ndert.\n\n",
+  "FullMessage": "Zweiter Commit beweist den Cycle funktioniert [Analyse: Thinker]\n\nThinker bestaetigt den Cycle. Squizzle hatte die Finalize-Umstrukturierung forensisch untersucht, weil der dirty-state nach Commits ein systematisches Problem war, daher laeuft jetzt jeder Commit sauber durch den DOKI-Flow. Die narrative_chain.json vom letzten FinalizeCommit wird automatisch mitgestaged, weil AssembleCommit alle DOKI-Dateien zusammenfasst. Das beweist: kein dirty state, kein nachziehender Cleanup, keine Ausnahme. Der Cycle funktioniert. CHANGELOG wird aktualisiert und Change-Index bleibt stabil.\n---\n[NARRATOR:Thinker] [MODEL:cursor-agent] [IMPULSE:Zweiter Commit beweist den Cycle funktioniert] [COMPOSITE:c6j16n3a1p4] [PREV_NARRATOR:Squizzle] [PREV_MODEL:cursor-agent]\n",
+  "Subject": "Zweiter Commit beweist den Cycle funktioniert [Analyse: Thinker]",
+  "Body": "Thinker bestaetigt den Cycle. Squizzle hatte die Finalize-Umstrukturierung forensisch untersucht, weil der dirty-state nach Commits ein systematisches Problem war, daher laeuft jetzt jeder Commit sauber durch den DOKI-Flow. Die narrative_chain.json vom letzten FinalizeCommit wird automatisch mitgestaged, weil AssembleCommit alle DOKI-Dateien zusammenfasst. Das beweist: kein dirty state, kein nachziehender Cleanup, keine Ausnahme. Der Cycle funktioniert. CHANGELOG wird aktualisiert und Change-Index bleibt stabil.",
+  "ChangelogEntry": "### [2026-06-26 08:00:00] Zweiter Commit beweist den Cycle funktioniert\n**Narrator:** Thinker | **Model:** cursor-agent | **Composite:** \u0060c6j16n3a1p4\u0060\n- 0 Datei(en) ge\u00E4ndert.\n\n",
   "Model": "cursor-agent",
   "Composite": {
-    "Composite": "c5j86n5a1p4",
+    "Composite": "c6j16n3a1p4",
     "Seed": 0,
-    "TreeHash": "d84d52d6affc4d26b857b1585c0abe3ba533428d",
+    "TreeHash": "1cf5b036e0c4d9b9b1d8b2814803ff56a7b72a7d",
     "DiffHash": "",
-    "Mood": "m\u00FCde-zufrieden",
-    "C": 5,
-    "J": 86,
-    "N": 5,
+    "Mood": "alarmiert",
+    "C": 6,
+    "J": 16,
+    "N": 3,
     "A": 1,
     "P": 4
   },
   "NarratorState": {
-    "Name": "Squizzle",
-    "Role": "Forensiker",
+    "Name": "Thinker",
+    "Role": "Analyse-Agent",
     "VoiceTraits": "",
     "ToneBrief": "",
-    "Mood": "m\u00FCde-zufrieden",
+    "Mood": "alarmiert",
     "MoodCombo": "",
     "Attitudes": {},
     "MinWords": 20,
@@ -37,9 +37,8 @@
   },
   "AffectedIds": [],
   "TechnicalSummaries": [],
-  "TreeHash": "d84d52d6affc4d26b857b1585c0abe3ba533428d",
+  "TreeHash": "1cf5b036e0c4d9b9b1d8b2814803ff56a7b72a7d",
   "StagedFiles": [
-    ".doki/Data/narrative_chain.json",
-    "CHANGELOG.md"
+    ".doki/Data/narrative_chain.json"
   ]
 }

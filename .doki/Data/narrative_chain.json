@@ -69,6 +69,18 @@
       "summary": "Hook-System auf DokiCommand umgestellt [Analyse: Thinker]",
       "prev_narrator": "Glitch",
       "prev_model": "cursor-agent"
+    },
+    {
+      "seq": 7,
+      "hash": "090cd20b7dcc75f815c68a73730c3bc99fe50ad5",
+      "composite": "c5j86n5a1p4",
+      "mood": "m\u00FCde-zufrieden",
+      "narrator": "Squizzle",
+      "model_id": "cursor-agent",
+      "date": "2026-06-26 07:00:00",
+      "summary": "Squizzles Fall: FinalizeCommit staged nichts mehr AssembleCommit\u2026",
+      "prev_narrator": "Thinker",
+      "prev_model": "cursor-agent"
     }
   ]
 }
