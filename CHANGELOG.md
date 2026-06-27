@@ -9,3 +9,11 @@ Bootstrap am 2026-06-26 — Chain beginnt bei `c0j0n0a0p0`.
 **Narrator:** Devin | **Model:** cursor-agent | **Composite:** `c1j11n6a1p1`
 - 0 Datei(en) geändert.
 
+### [2026-06-26 03:00:00] README erweitert mit Charakter-Tabelle und Determinismus
+**Narrator:** Vannon | **Model:** cursor-agent | **Composite:** `c2j75n4a1p1`
+- 0 Datei(en) geändert.
+
+### [2026-06-26 03:00:00] README erweitert mit Charakter-Tabelle und Determinismus
+**Narrator:** Vannon | **Model:** cursor-agent | **Composite:** `c2j75n4a1p1`
+- 0 Datei(en) geändert.
+

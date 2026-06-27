@@ -1,5 +1,5 @@
-Devin sagt: DOKI Bootstrap — Genesis
+README erweitert mit Charakter-Tabelle…
 
-Der erste Stein wurde gesetzt, weil ohne Fundament keine Chain existieren kann. DOKI Bootstrap wurde ausgeführt und legt ab hier die narrative Commit-Schicht ins Repository. Deshalb beginnt die Geschichte nicht mit leerem Boilerplate, sondern mit diesem bewussten Startpunkt. CHANGELOG und Change-Index werden ab dem nächsten Commit zur Pflicht, daher dokumentiert dieser Genesis-Eintrag die Installation selbst: DOKI installiert, Composite c0j0n0a0p0, Arc eins aktiv.
+Devin hat mit dem Genesis-Commit das Fundament gelegt, weil ohne Bootstrap keine Chain existieren kann. Deshalb baue ich jetzt auf Devins Arbeit auf und erweitere die README um die Charakter-Tabelle. Alle 14 Narratoren mit Rolle und Stimme stehen jetzt in einer sauberen Übersicht fuer neue Benutzer. Der Determinismus-Abschnitt ergaenzt die technische Basis, damit die Chain-Berechnung nachvollziehbar wird. CHANGELOG und Change-Index werden wie bei jedem Commit aktualisiert, weil DOKI Dokumentation als Pflicht behandelt.
 ---
-[NARRATOR:Devin] [MODEL:cursor-agent] [IMPULSE:DOKI Bootstrap — Genesis] [COMPOSITE:c1j11n6a1p1]
+[NARRATOR:Vannon] [MODEL:cursor-agent] [IMPULSE:README erweitert mit Charakter-Tabelle und Determinismus] [COMPOSITE:c2j75n4a1p1] [PREV_NARRATOR:Devin] [PREV_MODEL:cursor-agent]
