@@ -1,5 +1,5 @@
-README erweitert mit Charakter-Tabelle…
+Glitch ermittelt: AGENTS.md mit VerifyEngine-Checks und DOKI-only Warnung
 
-Devin hat mit dem Genesis-Commit das Fundament gelegt, weil ohne Bootstrap keine Chain existieren kann. Deshalb baue ich jetzt auf Devins Arbeit auf und erweitere die README um die Charakter-Tabelle. Alle 14 Narratoren mit Rolle und Stimme stehen jetzt in einer sauberen Übersicht fuer neue Benutzer. Der Determinismus-Abschnitt ergaenzt die technische Basis, damit die Chain-Berechnung nachvollziehbar wird. CHANGELOG und Change-Index werden wie bei jedem Commit aktualisiert, weil DOKI Dokumentation als Pflicht behandelt.
+Glitch meldet sich zu Wort. Vannon hatte die README mit der Charakter-Tabelle aufgepumpt, weil neue Benutzer einen Ueberblick brauchen. Deshalb greife ich jetzt die AGENTS.md auf und erweitere sie um die VerifyEngine-Checks, die DOKI-only Warnung und die Befehlsreferenz. Checks 1-6 werden als normale Fehler beschrieben, waehrend 7-9 als harte Bloecke markiert sind, weil Kausalitaet und Dokumentation nicht verhandelbar sind. Die DOKI-only Warnung steht jetzt prominent drin, weil ohne Bootstrap keine Chain existieren kann. CHANGELOG wird aktualisiert und Change-Index bleibt stabil, weil keine CSharp-Dateien geandert wurden.
 ---
-[NARRATOR:Vannon] [MODEL:cursor-agent] [IMPULSE:README erweitert mit Charakter-Tabelle und Determinismus] [COMPOSITE:c2j75n4a1p1] [PREV_NARRATOR:Devin] [PREV_MODEL:cursor-agent]
+[NARRATOR:Glitch] [MODEL:cursor-agent] [IMPULSE:AGENTS.md mit VerifyEngine-Checks und DOKI-only Warnung] [COMPOSITE:c3j46n10a1p2] [PREV_NARRATOR:Vannon] [PREV_MODEL:cursor-agent]

@@ -17,3 +17,15 @@ Bootstrap am 2026-06-26 — Chain beginnt bei `c0j0n0a0p0`.
 **Narrator:** Vannon | **Model:** cursor-agent | **Composite:** `c2j75n4a1p1`
 - 0 Datei(en) geändert.
 
+### [2026-06-26 04:00:00] AGENTS.md mit VerifyEngine-Checks und DOKI-only Warnung
+**Narrator:** Vannon | **Model:** cursor-agent | **Composite:** `c3j20n4a1p2`
+- 0 Datei(en) geändert.
+
+### [2026-06-26 04:00:00] AGENTS.md mit VerifyEngine-Checks und DOKI-only Warnung
+**Narrator:** Glitch | **Model:** cursor-agent | **Composite:** `c3j46n10a1p2`
+- 0 Datei(en) geändert.
+
+### [2026-06-26 04:00:00] AGENTS.md mit VerifyEngine-Checks und DOKI-only Warnung
+**Narrator:** Glitch | **Model:** cursor-agent | **Composite:** `c3j46n10a1p2`
+- 0 Datei(en) geändert.
+
