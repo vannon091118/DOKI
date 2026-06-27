@@ -1,0 +1,178 @@
+{
+  "$schema": "XBridge v1.1 — Stringmatrix",
+  "description": "Zentrale Text-/Prompt-Key-Registry. Jeder im Code verwendete String-Key MUSS hier definiert sein. Ermöglicht Übersetzungs-Mapping und Konsistenz-Prüfung.",
+  "version": "0.1.0-seed",
+  "status": "seed — v1.1 DocSync-Enforcement pending",
+  "last_updated": "2026-06-26",
+  "updated_by": "Buffy (Genesis)",
+
+  "languages": {
+    "primary": "de",
+    "supported": ["de", "en"],
+    "fallback": "de"
+  },
+
+  "domains": {
+    "commit_footer": {
+      "description": "Footer-Tokens in Commit-Messages",
+      "keys": {
+        "token_narrator": {
+          "de": "[NARRATOR:{0}]",
+          "en": "[NARRATOR:{0}]",
+          "context": "Erzähler-Identifikation im Commit-Footer"
+        },
+        "token_model": {
+          "de": "[MODEL:{0}]",
+          "en": "[MODEL:{0}]",
+          "context": "LLM-Model-Identifikation"
+        },
+        "token_impulse": {
+          "de": "[IMPULSE:{0}]",
+          "en": "[IMPULSE:{0}]",
+          "context": "User-Impuls der den Commit ausgelöst hat"
+        },
+        "token_composite": {
+          "de": "[COMPOSITE:{0}]",
+          "en": "[COMPOSITE:{0}]",
+          "context": "Deterministischer Composite-Hash"
+        },
+        "token_sideplot": {
+          "de": "[SIDEPLOT:{0}]",
+          "en": "[SIDEPLOT:{0}]",
+          "context": "Side-Plot Branch-Referenz bei Merge-Commits"
+        },
+        "token_prev_narrator": {
+          "de": "[PREV_NARRATOR:{0}]",
+          "en": "[PREV_NARRATOR:{0}]",
+          "context": "Cross-Narrator-Referenz"
+        },
+        "token_prev_model": {
+          "de": "[PREV_MODEL:{0}]",
+          "en": "[PREV_MODEL:{0}]",
+          "context": "Vorheriges LLM-Model"
+        },
+        "token_category": {
+          "de": "[CATEGORY:{0}]",
+          "en": "[CATEGORY:{0}]",
+          "context": "Commit-Kategorie (STANDARD, DOKU, FIX, etc.)"
+        },
+        "token_files_skip": {
+          "de": "[FILES:SKIP]",
+          "en": "[FILES:SKIP]",
+          "context": "Marker: >20 Dateien, File-Liste ausgelassen"
+        }
+      }
+    },
+
+    "verify_errors": {
+      "description": "VerifyEngine Fehlermeldungen (9 Checks)",
+      "keys": {
+        "check1_token_missing": {
+          "de": "CHECK 1: [{0}] Token fehlt.",
+          "en": "CHECK 1: [{0}] token missing."
+        },
+        "check2_impulse_short": {
+          "de": "CHECK 2: IMPULSE zu kurz (min. 5 Zeichen).",
+          "en": "CHECK 2: IMPULSE too short (min. 5 chars)."
+        },
+        "check2_impulse_not_integrated": {
+          "de": "CHECK 2: IMPULSE nicht im Commit-Body integriert.",
+          "en": "CHECK 2: IMPULSE not integrated in commit body."
+        },
+        "check3_too_many_bullets": {
+          "de": "CHECK 3: Zu viele Bullet-Points (>50%). Fließtext erzwingen.",
+          "en": "CHECK 3: Too many bullet points (>50%). Prose required."
+        },
+        "check3_no_causal": {
+          "de": "CHECK 3: Keine kausalen Konnektoren (weil/deshalb/daher/usw.) gefunden.",
+          "en": "CHECK 3: No causal connectors found (because/therefore/thus/etc.)."
+        },
+        "check4_narrator_unknown": {
+          "de": "CHECK 4: Narrator '{0}' nicht in character_sheets.json.",
+          "en": "CHECK 4: Narrator '{0}' not in character_sheets.json."
+        },
+        "check5_composite_invalid": {
+          "de": "CHECK 5: COMPOSITE-Token fehlt oder hat ungültiges Format.",
+          "en": "CHECK 5: COMPOSITE token missing or invalid format."
+        },
+        "check6_prev_narrator_not_mentioned": {
+          "de": "CHECK 6: PREV_NARRATOR '{0}' nicht im Commit-Body erwähnt.",
+          "en": "CHECK 6: PREV_NARRATOR '{0}' not mentioned in commit body."
+        },
+        "check7_no_causality": {
+          "de": "CHECK 7 (HARTER BLOCK): Keine Kausalitäts-Referenz im Commit. Commit abgelehnt.",
+          "en": "CHECK 7 (HARD BLOCK): No causality reference in commit. Rejected."
+        },
+        "check7_impulse_too_short": {
+          "de": "CHECK 7: IMPULSE zu kurz für Kausalitäts-Nachweis.",
+          "en": "CHECK 7: IMPULSE too short for causality proof."
+        },
+        "check8_changelog_missing": {
+          "de": "CHECK 8 (DocSync): CHANGELOG.md existiert nicht. Pflicht-Dokumentation fehlt.",
+          "en": "CHECK 8 (DocSync): CHANGELOG.md does not exist."
+        },
+        "check8_changelog_empty": {
+          "de": "CHECK 8 (DocSync): CHANGELOG.md ist leer. Pflicht-Dokumentation nicht aktuell.",
+          "en": "CHECK 8 (DocSync): CHANGELOG.md is empty."
+        },
+        "check8_index_missing": {
+          "de": "CHECK 8 (DocSync): change_index.json existiert nicht. Pflicht-Dokumentation fehlt.",
+          "en": "CHECK 8 (DocSync): change_index.json does not exist."
+        },
+        "check8_index_empty": {
+          "de": "CHECK 8 (DocSync): change_index.json ist leer. Pflicht-Dokumentation nicht aktuell.",
+          "en": "CHECK 8 (DocSync): change_index.json is empty."
+        },
+        "check8_not_staged": {
+          "de": "CHECK 8 (DocSync): {0} ist nicht gestaged. Pflicht: git add {0} vor Commit.",
+          "en": "CHECK 8 (DocSync): {0} is not staged. Required: git add {0} before commit."
+        },
+        "check8_no_doc_ref": {
+          "de": "CHECK 8 (DocSync): Commit-Body referenziert weder CHANGELOG noch Change-Index.",
+          "en": "CHECK 8 (DocSync): Commit body references neither CHANGELOG nor Change-Index."
+        },
+        "check9_illegal_commits": {
+          "de": "CHECK 9 (ChainAudit): {0} illegale Commits ({1}). KEIN [COMPOSITE:] Token.",
+          "en": "CHECK 9 (ChainAudit): {0} illegal commits ({1}). NO [COMPOSITE:] token."
+        }
+      }
+    },
+
+    "arc_names": {
+      "description": "Arc-Namen (emergieren aus ArcEngine, hier dokumentiert)",
+      "keys": {
+        "a1": {
+          "de": "Der erste Stein",
+          "en": "The First Stone",
+          "context": "Genesis-Arc: X-Bridge Commit-Layer"
+        }
+      }
+    },
+
+    "prompt_sections": {
+      "description": "Prompt-Bausteine für VoiceComposer (14 Charaktere × 10 Moods)",
+      "keys": {
+        "prompt_arc_climax_header": {
+          "de": "!!! ARC_CLIMAX — STAFFELFINALE !!!",
+          "en": "!!! ARC_CLIMAX — SEASON FINALE !!!"
+        },
+        "prompt_sideplot_header": {
+          "de": "!!! SIDE-PLOT — PARALLELE ENTWICKLUNG VEREINT !!!",
+          "en": "!!! SIDE-PLOT — PARALLEL DEVELOPMENT UNITED !!!"
+        },
+        "prompt_trivial_prefix": {
+          "de": "WICHTIG:",
+          "en": "IMPORTANT:"
+        }
+      }
+    }
+  },
+
+  "sync_rules": {
+    "description": "Regeln für Stringmatrix ↔ Code Synchronisation",
+    "check_on_commit": "v1.1 — VerifyEngine Check 10 prüft: alle Keys im Code sind in der Matrix",
+    "check_on_build": "Build-Warning wenn Key in Code aber nicht in Matrix",
+    "auto_add": "Neue Keys automatisch als 'TODO' in Matrix eintragen",
+    "stale_detection": "Keys in Matrix ohne Code-Referenz → Warning nach 30 Tagen"
+  }
+}

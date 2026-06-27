@@ -1,0 +1,222 @@
+{
+  "$schema": "XBridge v1.1 — Inventar",
+  "description": "Asset-/Komponenten-Register. Jede Code-Datei, JSON-Seed-Datei und Dokumentations-Datei MUSS hier registriert sein. Dient als Single Source of Truth für den Projektbestand.",
+  "version": "0.1.0-seed",
+  "status": "seed — v1.1 DocSync-Enforcement pending",
+  "last_updated": "2026-06-26",
+  "updated_by": "Buffy (Genesis)",
+
+  "project": {
+    "name": "X-Bridge",
+    "root_namespace": "XBridge",
+    "target_framework": "net9.0",
+    "language": "C# 13",
+    "paradigm": "Deterministic Class Library",
+    "repository": "local (Vannon/Desktop/X-Bridge)"
+  },
+
+  "components": {
+    "XBridge.CommitLayer": {
+      "type": "Class Library",
+      "csproj": "XBridge.CommitLayer/XBridge.CommitLayer.csproj",
+      "description": "Commit-Narrative Engine — deterministischer Geschichten-Generator für Git-Commits",
+      "status": "active",
+      "version": "0.1.0",
+
+      "source_files": {
+        "RngEngine.cs": {
+          "path": "XBridge.CommitLayer/RngEngine.cs",
+          "type": "static class",
+          "lines": 320,
+          "description": "Deterministischer RNG: XorShift128 + Djb2 + Composite-Derivation",
+          "key_exports": ["Djb2", "Derive", "SelectMood", "DecodeJ", "ParseComposite", "CompositeResult"],
+          "f_id": "F-001"
+        },
+        "CompositeEngine.cs": {
+          "path": "XBridge.CommitLayer/CompositeEngine.cs",
+          "type": "class",
+          "lines": 260,
+          "description": "Chain-Management: Load/Save/Append, Mood-Non-Repeat, Cross-Narrator",
+          "key_exports": ["LoadChain", "SaveChain", "GetNextComposite", "AppendChain", "FindPreviousNarrator"],
+          "c_id": "C-003"
+        },
+        "NarratorEngine.cs": {
+          "path": "XBridge.CommitLayer/NarratorEngine.cs",
+          "type": "class",
+          "lines": 220,
+          "description": "Charakter-Lader: 14 Characters aus JSON, Mood-Delta-Anwendung, Attitude-Clamping",
+          "key_exports": ["LoadCharacters", "LoadNarrativeParams", "ResolveNarrator", "GetNarratorName"],
+          "c_id": "C-004"
+        },
+        "VoiceComposer.cs": {
+          "path": "XBridge.CommitLayer/VoiceComposer.cs",
+          "type": "class",
+          "lines": 250,
+          "description": "Prompt-Bau: System+User Prompt mit Charakter+Sentiment+Arc+SidePlot",
+          "key_exports": ["BuildNarrativePrompt", "BuildSubject", "ClassifyImpulse"],
+          "c_id": "C-005"
+        },
+        "RelationshipEngine.cs": {
+          "path": "XBridge.CommitLayer/RelationshipEngine.cs",
+          "type": "class",
+          "lines": 190,
+          "description": "Dynamische Beziehungen: Sentiment 0-10, KnowledgeSummary, ToneDirective",
+          "key_exports": ["BuildContext", "DescribeSentiment"],
+          "c_id": "C-006"
+        },
+        "ChangeIndexEngine.cs": {
+          "path": "XBridge.CommitLayer/ChangeIndexEngine.cs",
+          "type": "class",
+          "lines": 340,
+          "description": "Technische Doku: git diff → Entitäten mit Zeilennummern, F-xxx/C-xxx IDs",
+          "key_exports": ["AnalyzeDiff", "BuildIndexUpdate", "SaveChanges", "UpdateCommitHashes"],
+          "c_id": "C-007"
+        },
+        "VerifyEngine.cs": {
+          "path": "XBridge.CommitLayer/VerifyEngine.cs",
+          "type": "class",
+          "lines": 270,
+          "description": "9-Check-Validator: Token, Impulse, Storytelling, Narrator, Composite, DocSync, ChainAudit",
+          "key_exports": ["Validate", "RunChecks"],
+          "c_id": "C-008"
+        },
+        "CommitOrchestrator.cs": {
+          "path": "XBridge.CommitLayer/CommitOrchestrator.cs",
+          "type": "class",
+          "lines": 440,
+          "description": "Orchestrator: Commit() Flow + GitHelper (treeHash, diffHash, Merge-Erkennung)",
+          "key_exports": ["Commit", "BuildPrompt", "AssembleCommit", "FinalizeCommit"],
+          "c_id": "C-009"
+        },
+        "ArcEngine.cs": {
+          "path": "XBridge.CommitLayer/ArcEngine.cs",
+          "type": "class",
+          "lines": 190,
+          "description": "Emergente Handlungsbögen: Gewichtsformel, ARC_CLIMAX-Trigger, Auto-Advance",
+          "key_exports": ["CheckArcWeight", "AdvanceArc"],
+          "c_id": "C-010"
+        },
+        "SidePlotEngine.cs": {
+          "path": "XBridge.CommitLayer/SidePlotEngine.cs",
+          "type": "class",
+          "lines": 140,
+          "description": "Branch/Merge-Logik: MERGE_HEAD-Erkennung, Divergenzpunkt, SidePlot-Kontext",
+          "key_exports": ["DetectSidePlot", "GenerateSidePlotName"],
+          "c_id": "C-011"
+        }
+      },
+
+      "data_seeds": {
+        "character_sheets.json": {
+          "path": "XBridge.CommitLayer/Data/character_sheets.json",
+          "type": "JSON Seed",
+          "description": "14 Charaktere mit VoiceTraits, Attitudes, Relationships, VerifierRules",
+          "record_count": 14
+        },
+        "narrative_params.json": {
+          "path": "XBridge.CommitLayer/Data/narrative_params.json",
+          "type": "JSON Seed",
+          "description": "Mood-Deltas, Narrator-Mood-Kombinationen, Decoding-Tables",
+          "record_count": 10
+        },
+        "lore_arcs.json": {
+          "path": "XBridge.CommitLayer/Data/lore_arcs.json",
+          "type": "JSON Seed",
+          "description": "Arc-Registry: aktiver Arc + archivierte Arcs",
+          "record_count": 1
+        },
+        "narrative_chain.json": {
+          "path": "XBridge.CommitLayer/Data/narrative_chain.json",
+          "type": "JSON Seed",
+          "description": "Chain-State: genesis_composite + genesis_mood + entries[]",
+          "record_count": 0
+        },
+        "writing_rules.json": {
+          "path": "XBridge.CommitLayer/Data/writing_rules.json",
+          "type": "JSON Seed",
+          "description": "Dokumentation der Schreibregeln (in VerifyEngine.cs hartkodiert)",
+          "record_count": 1
+        },
+        "string_matrix.json": {
+          "path": "XBridge.CommitLayer/Data/string_matrix.json",
+          "type": "JSON Seed",
+          "description": "String-Key-Registry für Übersetzung und Konsistenz-Prüfung",
+          "record_count": 0,
+          "status": "seed — v1.1"
+        }
+      },
+
+      "runtime_files": {
+        "CHANGELOG.md": {
+          "path": "CHANGELOG.md",
+          "type": "Auto-generated",
+          "description": "Commit-Chronik — wird von CommitOrchestrator.AssembleCommit() geschrieben",
+          "enforced_by": "VerifyEngine Check 8 (DocSync)"
+        },
+        "change_index.json": {
+          "path": "XBridge.CommitLayer/Data/change_index.json",
+          "type": "Auto-generated",
+          "description": "Entitäten-Register — wird von ChangeIndexEngine geschrieben",
+          "enforced_by": "VerifyEngine Check 8 (DocSync)"
+        }
+      }
+    },
+
+    "XBridge.Core": {
+      "type": "Class Library",
+      "status": "planned",
+      "description": "Übersetzungs-Pipeline — [geplant]"
+    },
+    "XBridge.Persistence": {
+      "type": "Class Library",
+      "status": "planned",
+      "description": "DB-Zugriffe — [geplant]"
+    },
+    "XBridge.Providers": {
+      "type": "Class Library",
+      "status": "planned",
+      "description": "API-Clients — [geplant]"
+    },
+    "XBridge.Adapters": {
+      "type": "Class Library",
+      "status": "planned",
+      "description": "Spiel-spezifische Logik — [geplant]"
+    },
+    "XBridge.Cli": {
+      "type": "Console Application",
+      "status": "planned",
+      "description": "CLI-Program.cs — [geplant]"
+    },
+    "XBridge.GUI": {
+      "type": "ASP.NET Core",
+      "status": "planned",
+      "description": "Web-Frontend — [geplant]"
+    }
+  },
+
+  "documentation": {
+    "AGENTS.md": {
+      "path": "AGENTS.md",
+      "type": "Agent-Instruction",
+      "description": "Projektregeln, Commit-Flow, System-Architektur für LLM-Agenten"
+    },
+    "TEST_COMMIT_INIT.txt": {
+      "path": "TEST_COMMIT_INIT.txt",
+      "type": "Test-Asset",
+      "description": "Genesis-Commit-Beispiel mit System-Vorstellung"
+    },
+    "docs/archive/": {
+      "path": "docs/archive/",
+      "type": "Archiv",
+      "description": "SyxBridge-Architekturvorlage (NICHT aktiv, nur Referenz)"
+    }
+  },
+
+  "sync_rules": {
+    "description": "Regeln für Inventar ↔ Dateisystem Synchronisation",
+    "check_on_commit": "v1.1 — VerifyEngine Check 11 prüft: alle .cs/.json im Tree sind im Inventar",
+    "check_on_build": "Build-Warning wenn Datei auf Disk aber nicht im Inventar",
+    "auto_add": "Neue .cs-Dateien automatisch als 'TODO' in Inventar eintragen",
+    "stale_detection": "Inventar-Einträge ohne Disk-Datei → Warning nach 24h (gelöscht?)"
+  }
+}

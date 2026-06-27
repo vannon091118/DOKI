@@ -1,0 +1,16 @@
+{
+  "genesis_composite": "c0j0n0a0p0",
+  "genesis_mood": "genesis",
+  "entries": [
+    {
+      "seq": 1,
+      "hash": "HEAD",
+      "composite": "c1j11n6a1p1",
+      "mood": "sarkastisch",
+      "narrator": "Devin",
+      "model_id": "cursor-agent",
+      "date": "2026-06-26 01:00:00",
+      "summary": "Devin sagt: DOKI Bootstrap \u2014 Genesis"
+    }
+  ]
+}

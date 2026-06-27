@@ -1,0 +1,14 @@
+{
+  "description": "Arcs als abstrakte ID-Map (A1..AN). Jeder Arc repräsentiert eine Projekt-Phase.",
+  "active": "a1",
+  "arcs": {
+    "a1": {
+      "id": "a1",
+      "name": "Der erste Stein",
+      "version": "v0.1.0",
+      "theme": "Genesis — DOKI Bootstrap. Commit-Narrative-System als Fundament, deterministisch und prompt-basiert.",
+      "span": "2026-06-26 → heute",
+      "status": "active"
+    }
+  }
+}

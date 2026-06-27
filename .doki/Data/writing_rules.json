@@ -1,0 +1,119 @@
+{
+  "rules": {
+    "workplace_tone": {
+      "description": "Jeder Commit ist ein Arbeitstag im Repo. Beschreibe was gemacht wurde, warum, und was als nächstes kommt. Klar, präzise, menschlich. Kein Theater, keine vorgeschriebenen Töne. Das Repo ist ein Arbeitsplatz — die Commits führen Tagebuch über die Arbeit.",
+      "required": true
+    },
+    "commit_diary": {
+      "description": "Zusammenfassung der an diesem Commit erledigten Arbeit. Was wurde geändert, warum, welche Auswirkung hat es?",
+      "required": true,
+      "min_words": {
+        "STANDARD": 80,
+        "TEST-ASSET": 60,
+        "TRIVIAL": 20,
+        "LORE-ONLY": 40,
+        "RESTRUCTURE": 200,
+        "HOTFIX": 40
+      },
+      "max_words": {
+        "STANDARD": 1500,
+        "TEST-ASSET": 800,
+        "TRIVIAL": 200,
+        "LORE-ONLY": 600,
+        "RESTRUCTURE": 500,
+        "HOTFIX": 200
+      },
+      "bullet_policy": {
+        "STANDARD": "max_50_percent",
+        "TEST-ASSET": "max_50_percent",
+        "TRIVIAL": "max_50_percent",
+        "LORE-ONLY": "max_50_percent",
+        "RESTRUCTURE": "allowed",
+        "HOTFIX": "allowed"
+      },
+      "storytelling_required": {
+        "STANDARD": true,
+        "TEST-ASSET": true,
+        "TRIVIAL": false,
+        "LORE-ONLY": true,
+        "RESTRUCTURE": false,
+        "HOTFIX": false
+      },
+      "files_skip_threshold": 20,
+      "auto_detect_info": {
+        "_note": "Regeln sind in VerifyEngine.cs hartkodiert. Änderungen hier haben KEINE Auswirkung — reine Dokumentation.",
+        "RESTRUCTURE": "staged_files > 15 OR message_contains(restruktur|verschoben|moved|umstruktur)",
+        "HOTFIX": "word_count < 60 AND message_contains(fix|hotfix|bugfix|patch)",
+        "TRIVIAL": "word_count < 30 AND staged_files <= 3"
+      },
+      "stretching_policy": "Keine künstliche Streckung. Wenn kurz, dann kurz. RESTRUCTURE: File-Listen als Bullet-Punkte erlaubt. HOTFIX: Minimal, Fakten reichen."
+    },
+    "model_signature": {
+      "description": "Commit message muss den ausführenden Agenten ausweisen.",
+      "required": true,
+      "token_format": "[MODEL:<model-name>]",
+      "regex": "\\[MODEL:([a-z0-9._-]+)\\]"
+    },
+    "impulse_token": {
+      "description": "Der [IMPULSE:<user-input>] Token dokumentiert den Auftrag der diesen Commit ausgelöst hat.",
+      "required": true,
+      "token_format": "[IMPULSE:<user-input>]",
+      "regex": "\\[IMPULSE:(.{5,}?)\\]",
+      "min_length": 5
+    },
+    "narrator_token": {
+      "description": "[NARRATOR:<Name>] Pflicht-Token. Der Erzähler wird deterministisch aus dem Composite-Hash n-Feld abgeleitet (1=Buffy, 2=Basher, 3=Thinker, 4=Vannon, 5=Squizzle, 6=Devin, 7=Argos, 8=Ghost, 9=Spark, 10=Glitch, 11=Null, 12=Echo, 13=Flux, 14=Sage). Die Commit-Message MUSS aus der Perspektive dieses Charakters geschrieben sein — mit dessen Stimme, Wortwahl und Denkmustern.",
+      "required": true,
+      "token_format": "[NARRATOR:<Buffy|Basher|Thinker|Vannon|Squizzle|Devin|Argos|Ghost|Spark|Glitch|Null|Echo|Flux|Sage>]",
+      "regex": "\\[NARRATOR:(Buffy|Basher|Thinker|Vannon|Squizzle|Devin|Argos|Ghost|Spark|Glitch|Null|Echo|Flux|Sage)\\]",
+      "source": "character_sheets.json → characters[n].name",
+      "enforcement": "VerifyEngine.cs prüft: Token existiert, Name matcht Composite n-Feld, charakterspezifische Wortzahl + Sprachmuster"
+    },
+    "file_references": {
+      "description": "Alle staged Files müssen in der Commit-Nachricht referenziert werden (basename oder stem reicht).",
+      "required": true
+    },
+    "composite_token": {
+      "description": "[COMPOSITE:cXjXnXaXpX] Pflicht-Token. Kodiert Commit-Sequenz, narrative Anweisung, Narrator, Arc- und Plot-Referenz. Deterministisch aus vorherigem Composite + Commit-Hash abgeleitet.",
+      "required": true,
+      "token_format": "[COMPOSITE:c<seq>j<narrative>n<narrator>a<arc>p<plot>]",
+      "regex": "\\[COMPOSITE:(c\\d+j\\d+n\\d+a\\d+p\\d+)\\]"
+    },
+    "seed_chain": {
+      "description": "Die Composite-Chain muss deterministisch konsistent sein. composite[N] == derive(composite[N-1], commitHash). Wird von VerifyEngine.cs geprüft.",
+      "required": true
+    },
+    "changelog_anchor": {
+      "description": "Jeder CHANGELOG.md-Eintrag MUSS Commit-Hash + Composite-Hash enthalten. Format: > **Commit:** `hash` | **Composite:** `cXjXnXaXpX`",
+      "required": true
+    },
+    "doc_sync": {
+      "description": "Dokumentations-Pflicht: Vor jedem Commit muss geprüft werden ob CHANGELOG.md, change_index.json und die Projekt-Dokumentation aktuell sind. Geprüft von VerifyEngine.cs Check 8 (DocSync).",
+      "required": true,
+      "enforcement": "VerifyEngine.cs Check 8 — harter Block wenn Doku nicht aktuell"
+    },
+    "optional_elements": {
+      "sidejoke": {
+        "description": "Freiwillig: Ein Sidejoke kann eingebaut werden. Kein fixer Pool mehr — generativ pro Commit.",
+        "required": false
+      },
+      "arc_reference": {
+        "description": "Freiwillig: Verweis auf den aktuellen Arc oder einen archivierten Arc. Wird jetzt über den Composite-Hash referenziert.",
+        "required": false
+      },
+      "narrator_attitudes": {
+        "description": "Die Disposition des Erzählers. Jeder Narrator hat persistente Basis-Werte (Attitudes 0-10). Werden durch tagesaktuelle Mood-Deltas modifiziert. Die finalen Attitudes definieren den Ton der Message.",
+        "required": false,
+        "source": "character_sheets.json → characters[n].attitudes + narrative_params.json → attitude_modifiers[mood]"
+      },
+      "cross_narrator_reference": {
+        "description": "Jeder Commit MUSS mindestens einmal den vorherigen Narrator namentlich erwähnen (außer Genesis-Commit). Bei Dialog-Struktur müssen mindestens 2 Charaktere interagieren.",
+        "required": true,
+        "min_mentions": 1,
+        "dialog_min_mentions": 2,
+        "token_format": "[PREV_NARRATOR:<Name>] — wird von CompositeEngine bereitgestellt. Existiert NICHT beim Genesis-Commit.",
+        "enforcement": "VerifyEngine.cs prüft: Mind. 1 Erwähnung des PREV_NARRATOR-Namens im Commit-Text (wenn Token existiert)."
+      }
+    }
+  }
+}

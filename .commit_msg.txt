@@ -1,0 +1,5 @@
+Devin sagt: DOKI Bootstrap — Genesis
+
+Der erste Stein wurde gesetzt, weil ohne Fundament keine Chain existieren kann. DOKI Bootstrap wurde ausgeführt und legt ab hier die narrative Commit-Schicht ins Repository. Deshalb beginnt die Geschichte nicht mit leerem Boilerplate, sondern mit diesem bewussten Startpunkt. CHANGELOG und Change-Index werden ab dem nächsten Commit zur Pflicht, daher dokumentiert dieser Genesis-Eintrag die Installation selbst: DOKI installiert, Composite c0j0n0a0p0, Arc eins aktiv.
+---
+[NARRATOR:Devin] [MODEL:cursor-agent] [IMPULSE:DOKI Bootstrap — Genesis] [COMPOSITE:c1j11n6a1p1]
