@@ -73,3 +73,4 @@ Deterministisch **innerhalb einer Chain** — gleicher Vorgänger-Composite + gl
 ## Version
 
 DOKI 0.1.0 — Bootstrap 2026-06-26
+/* Hook-System updated: DokiCommand() replaces DokiExecutable() */
