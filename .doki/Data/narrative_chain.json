@@ -45,6 +45,30 @@
       "summary": "Glitch ermittelt: AGENTS.md mit VerifyEngine-Checks und DOKI-only Warnung",
       "prev_narrator": "Vannon",
       "prev_model": "cursor-agent"
+    },
+    {
+      "seq": 5,
+      "hash": "3bf5cab1337e1e649d9ad4233cb9da7e551c99ec",
+      "composite": "c4j40n3a1p4",
+      "mood": "sachlich",
+      "narrator": "Thinker",
+      "model_id": "cursor-agent",
+      "date": "2026-06-26 05:00:00",
+      "summary": "Hook-System auf DokiCommand umgestellt [Analyse: Thinker]",
+      "prev_narrator": "Glitch",
+      "prev_model": "cursor-agent"
+    },
+    {
+      "seq": 6,
+      "hash": "c6f4d1e2f5c6df47aff8a359bc0c964f493ee697",
+      "composite": "c4j40n3a1p4",
+      "mood": "sachlich",
+      "narrator": "Thinker",
+      "model_id": "cursor-agent",
+      "date": "2026-06-26 06:00:00",
+      "summary": "Hook-System auf DokiCommand umgestellt [Analyse: Thinker]",
+      "prev_narrator": "Glitch",
+      "prev_model": "cursor-agent"
     }
   ]
 }

@@ -1,27 +1,27 @@
 {
-  "FullMessage": "Hook-System auf DokiCommand umgestellt [Analyse: Thinker]\n\nThinker analysiert die Hook-Aenderung. Das bisherige DokiExecutable() gab bei dotnet run den dotnet-Host zurueck, weil Environment.ProcessPath den Host-Prozess referenziert, deshalb scheiterte der commit-msg Hook mit \u0022dotnet.exe verify-only\u0022. Die Loesung ist DokiCommand(), weil es zwischen Standalone-Exe und dotnet-Entwicklungsumgebung unterscheidet und den korrekten Shell-Befehl mit Pfad-Quoting generiert. Die Hook-Templates nutzen jetzt {{DOKI_CMD}} inline statt einer Variable, daher landen die Quotes direkt im Shell-Script und Pfade mit Leerzeichen werden korrekt behandelt. Glitch hatte vorher den Zustand analysiert, daher baue ich auf seinen Erkenntnissen auf. CHANGELOG wird aktualisiert und Change-Index bleibt stabil.\n---\n[NARRATOR:Thinker] [MODEL:cursor-agent] [IMPULSE:Hook-System auf DokiCommand umgestellt] [COMPOSITE:c4j40n3a1p4] [PREV_NARRATOR:Glitch] [PREV_MODEL:cursor-agent]\n",
-  "Subject": "Hook-System auf DokiCommand umgestellt [Analyse: Thinker]",
-  "Body": "Thinker analysiert die Hook-Aenderung. Das bisherige DokiExecutable() gab bei dotnet run den dotnet-Host zurueck, weil Environment.ProcessPath den Host-Prozess referenziert, deshalb scheiterte der commit-msg Hook mit \u0022dotnet.exe verify-only\u0022. Die Loesung ist DokiCommand(), weil es zwischen Standalone-Exe und dotnet-Entwicklungsumgebung unterscheidet und den korrekten Shell-Befehl mit Pfad-Quoting generiert. Die Hook-Templates nutzen jetzt {{DOKI_CMD}} inline statt einer Variable, daher landen die Quotes direkt im Shell-Script und Pfade mit Leerzeichen werden korrekt behandelt. Glitch hatte vorher den Zustand analysiert, daher baue ich auf seinen Erkenntnissen auf. CHANGELOG wird aktualisiert und Change-Index bleibt stabil.",
-  "ChangelogEntry": "### [2026-06-26 05:00:00] Hook-System auf DokiCommand umgestellt\n**Narrator:** Thinker | **Model:** cursor-agent | **Composite:** \u0060c4j40n3a1p4\u0060\n- 0 Datei(en) ge\u00E4ndert.\n\n",
+  "FullMessage": "Squizzles Fall: FinalizeCommit staged nichts mehr AssembleCommit\u2026\n\nSquizzle untersucht die Spur. Thinker hatte die Hook-Architektur analysiert, weil DokiExecutable den dotnet-Host statt den DOKI-Binary zurueckgab, deshalb wurde nicht nur der Hook gefixt sondern auch die Finalize-Logik umstrukturiert. FinalizeCommit schreibt jetzt nur noch auf Platte, weil die Hash-Ersetzungen den echten Commit-Hash brauchen der erst nach git commit existiert. Deshalb uebernimmt AssembleCommit das Staging von narrative_chain und lore_arcs zusammen mit CHANGELOG und change_index, damit jeder Commit den vollstaendigen DOKI-Zustand enthaelt. Kein dirty state, kein nachziehender Cleanup-Commit, keine Ausnahme. CHANGELOG wird aktualisiert und Change-Index bleibt stabil weil keine CSharp-Dateien geandert wurden.\n---\n[NARRATOR:Squizzle] [MODEL:cursor-agent] [IMPULSE:FinalizeCommit staged nichts mehr AssembleCommit uebernimmt] [COMPOSITE:c5j86n5a1p4] [PREV_NARRATOR:Thinker] [PREV_MODEL:cursor-agent]\n",
+  "Subject": "Squizzles Fall: FinalizeCommit staged nichts mehr AssembleCommit\u2026",
+  "Body": "Squizzle untersucht die Spur. Thinker hatte die Hook-Architektur analysiert, weil DokiExecutable den dotnet-Host statt den DOKI-Binary zurueckgab, deshalb wurde nicht nur der Hook gefixt sondern auch die Finalize-Logik umstrukturiert. FinalizeCommit schreibt jetzt nur noch auf Platte, weil die Hash-Ersetzungen den echten Commit-Hash brauchen der erst nach git commit existiert. Deshalb uebernimmt AssembleCommit das Staging von narrative_chain und lore_arcs zusammen mit CHANGELOG und change_index, damit jeder Commit den vollstaendigen DOKI-Zustand enthaelt. Kein dirty state, kein nachziehender Cleanup-Commit, keine Ausnahme. CHANGELOG wird aktualisiert und Change-Index bleibt stabil weil keine CSharp-Dateien geandert wurden.",
+  "ChangelogEntry": "### [2026-06-26 07:00:00] FinalizeCommit staged nichts mehr AssembleCommit uebernimmt\n**Narrator:** Squizzle | **Model:** cursor-agent | **Composite:** \u0060c5j86n5a1p4\u0060\n- 0 Datei(en) ge\u00E4ndert.\n\n",
   "Model": "cursor-agent",
   "Composite": {
-    "Composite": "c4j40n3a1p4",
+    "Composite": "c5j86n5a1p4",
     "Seed": 0,
-    "TreeHash": "10aa95c73ca4e0f54bde48383b6637ff1aafecae",
+    "TreeHash": "d84d52d6affc4d26b857b1585c0abe3ba533428d",
     "DiffHash": "",
-    "Mood": "sachlich",
-    "C": 4,
-    "J": 40,
-    "N": 3,
+    "Mood": "m\u00FCde-zufrieden",
+    "C": 5,
+    "J": 86,
+    "N": 5,
     "A": 1,
     "P": 4
   },
   "NarratorState": {
-    "Name": "Thinker",
-    "Role": "Analyse-Agent",
+    "Name": "Squizzle",
+    "Role": "Forensiker",
     "VoiceTraits": "",
     "ToneBrief": "",
-    "Mood": "sachlich",
+    "Mood": "m\u00FCde-zufrieden",
     "MoodCombo": "",
     "Attitudes": {},
     "MinWords": 20,
@@ -37,8 +37,9 @@
   },
   "AffectedIds": [],
   "TechnicalSummaries": [],
-  "TreeHash": "10aa95c73ca4e0f54bde48383b6637ff1aafecae",
+  "TreeHash": "d84d52d6affc4d26b857b1585c0abe3ba533428d",
   "StagedFiles": [
-    "README.md"
+    ".doki/Data/narrative_chain.json",
+    "CHANGELOG.md"
   ]
 }
