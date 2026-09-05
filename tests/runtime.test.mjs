@@ -213,11 +213,14 @@ test('100x identisches Event -> genau 1 semantisches Update, FalsifyMe unberuehr
   rmSync(dir, { recursive: true, force: true });
 });
 
-test('Contract-SHA-Mismatch -> UNAVAILABLE + CONTRACT_MISMATCH, keine Interpretation', async () => {
+test('K3: Adapter meldet FREMDE Vertrags-Version -> UNAVAILABLE + CONTRACT_MISMATCH, keine Interpretation', async () => {
   const { dir, fdb, dPath } = fixture();
   const ddb = openDokiDb(dPath);
-  const env = { DOKI_MAX_CALLS: '0', FALSIFYME_CONTRACT_SHA: 'deadbeef00000000000000000000000000000000' };
-  const m = await processEvent({ falsifyDb: fdb, dokiDb: ddb, eventId: 'e1', env });
+  const env = { DOKI_MAX_CALLS: '0' };
+  const m = await processEvent({
+    falsifyDb: fdb, dokiDb: ddb, eventId: 'e1', env,
+    adapterContract: () => ({ contract_version: 'deadbeef-fremdes-system' }),
+  });
   assert.equal(m.mode, 'UNAVAILABLE');
   assert.ok(m.anomaly_refs.includes('CONTRACT_MISMATCH'));
   assert.equal(m.authority, 'NONE');

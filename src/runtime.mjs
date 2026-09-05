@@ -2,8 +2,8 @@ import { digestJson } from './hash.mjs';
 import { buildHistory, correlation } from './history.mjs';
 import { compilePrompt, detectInstructionLikeData } from './prompt.mjs';
 import { callModel, modelForAction, activeThinkerRunExists } from './model.mjs';
-import { RUNTIME_VERSION, checkContract } from './contracts.mjs';
-import { inspectEventContinuity, readSnapshot, sharedKeyWindowOpen } from './falsify-adapter.mjs';
+import { RUNTIME_VERSION, checkAdapterContract } from './contracts.mjs';
+import { inspectEventContinuity, readSnapshot, sharedKeyWindowOpen, adapterContract as defaultAdapterContract } from './falsify-adapter.mjs';
 import { buildNarratorContext } from './narrator-context.mjs';
 import { narrateOnce } from './thinker-orchestrator.mjs';
 import { etats } from './etats.mjs';
@@ -204,11 +204,15 @@ async function narrate({report,snapshot,history,updateId,env,falsifyDb,dokiDb,mo
   }
 }
 
-export async function processEvent({falsifyDb,dokiDb,eventId,env=process.env,modelCall=callModel}) {
-  const contract=checkContract(env);
+// K3-Rework: der Vertrags-Check ist ein PORT. Default = der falsify-Adapter
+// (meldet seine Version selbst); Tests/andere Quellen injizieren ihren eigenen
+// Adapter-Vertrag. Kein Env-Pin mehr — DOKIs Identität hängt an keinem fremden
+// Commit, aber fail-closed bleibt: unbekannte Version → UNAVAILABLE.
+export async function processEvent({falsifyDb,dokiDb,eventId,env=process.env,modelCall=callModel,adapterContract:adapterContractPort=defaultAdapterContract}) {
+  const contract=checkAdapterContract(adapterContractPort());
   if(!contract.ok){
     const updateId=updateIdFor(eventId);
-    return {schema:'doki_message/v1',message_id:digestJson(updateId),update_ref:updateId,phase_report_ref:null,mode:'UNAVAILABLE',render_path:'FACTUAL_FALLBACK',reswitch_count:0,narrator_ref:null,body:'DOKI kann diesen FalsifyMe-Zustand nicht interpretieren (CONTRACT_MISMATCH: erwartet '+contract.expected+', konfiguriert '+contract.configured+').',evidence_refs:[],anomaly_refs:['CONTRACT_MISMATCH'],authority:'NONE'};
+    return {schema:'doki_message/v1',message_id:digestJson(updateId),update_ref:updateId,phase_report_ref:null,mode:'UNAVAILABLE',render_path:'FACTUAL_FALLBACK',reswitch_count:0,narrator_ref:null,body:'DOKI kann diesen Zustand nicht interpretieren (CONTRACT_MISMATCH: erwartet '+JSON.stringify(contract.expected)+', Adapter meldet '+contract.configured+').',evidence_refs:[],anomaly_refs:['CONTRACT_MISMATCH'],authority:'NONE'};
   }
   const {snapshot,snapshotDigest}=readSnapshot(falsifyDb,eventId), updateId=updateIdFor(eventId);
   const claim=claimUpdate(dokiDb,updateId,eventId);

@@ -18,7 +18,11 @@
 //   (shouldRun/shouldAbort, Signaturen existieren in thinker-orchestrator.mjs).
 // ─────────────────────────────────────────────────────────────────────────────
 import { digestJson } from './hash.mjs';
-import { TERMINAL_STATES, ACTIVE_STATES } from './contracts.mjs';
+import { TERMINAL_STATES, ACTIVE_STATES, SUPPORTED_CONTRACT_VERSIONS } from './contracts.mjs';
+
+// K3-Rework: der Adapter MELDET seine Vertrags-Version (Port-Konvention).
+// DOKI-prüft diese gegen SUPPORTED_CONTRACT_VERSIONS — fail-closed bei Fremd-
+// versionen. Kein Env-Pin, kein FalsifyMe-Commit mehr in DOKIs Identität.
 // K2 (Schritt 2): FM-interne Event-Namen NUR hier als Datenwerte, benannt via
 // vocabulary.mjs — kein verstreuter Name in Consumer-Modulen.
 import { WIRE_THINKER_WINDOW_EVENTS } from './vocabulary.mjs';
@@ -103,4 +107,13 @@ export function sharedKeyWindowOpen(fdb, eventId) {
 export function activeThinkerRunExists(fdb) {
   const marks = ACTIVE_STATES.map(() => '?').join(', ');
   return Boolean(fdb.prepare(`SELECT 1 FROM jobs WHERE loop_state IN (${marks}) LIMIT 1`).get(...ACTIVE_STATES));
+}
+
+/** Vertrags-Ankündigung des Adapters (Port-Konvention, K3-Rework). */
+export function adapterContract() {
+  return {
+    adapter: 'falsify-db-readonly',
+    contract_version: SUPPORTED_CONTRACT_VERSIONS[0],
+    schema_owner: 'falsify-adapter.mjs (EINZIGER Schema-Kenner)',
+  };
 }

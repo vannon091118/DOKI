@@ -8,19 +8,37 @@ export const DEFAULT_MAX_RESWITCH = 5;
 export const DEFAULT_MAX_CALLS = 6;
 export const DEFAULT_TOKEN_BUDGET = 1500;
 
-// ── FalsifyMe-Vertrag (Contract SHA) ─────────────────────────────────────────
-// DOKI ist gegen einen KONKRETEN FalsifyMe-Freeze-Commit gebaut. Der SHA ist
-// der Kompatibilitätsanker: weicht der konfigurierte SHA ab, darf DOKI keine
-// Interpretation auf unbekannter Struktur durchführen (CONTRACT_MISMATCH →
-// mode=UNAVAILABLE). Der Default ist der SHA des FalsifyMe-Freeze-Stands, der
-// die Schemas definiert hat, gegen die DOKI getestet wurde.
-export const EXPECTED_FALSIFYME_CONTRACT_SHA = process.env.FALSIFYME_CONTRACT_SHA || '56d2fb7e0fa6c2101700b2616f0b02d4725615bf';
+// ── Adapter-Vertrag (generisch, K3-Rework 2026-09-06) ────────────────────────
+// ALT (entfernt): DOKI war gegen einen KONKRETEN FalsifyMe-Freeze-Commit
+// gepinnt (EXPECTED_FALSIFYME_CONTRACT_SHA + FALSIFYME_CONTRACT_SHA-Env).
+// Das machte DOKI allein nicht lauffähig und pinnte die eigene Identität an
+// einen fremden Commit. NEU: JEDER Ingest-Adapter (FalsifyMe-DB, FM-EVT-Feed,
+// jedes andere System) MELDET SEINE Vertrags-Version als Daten. DOKI hält
+// selbst die Liste der Vertrags-Versionen, gegen die es gebaut/getestet ist,
+// und lehnt Fremdversionen fail-closed ab (CONTRACT_MISMATCH → UNAVAILABLE).
+// Der Mechanismus kennt kein FalsifyMe mehr — nur Versionen.
+export const SUPPORTED_CONTRACT_VERSIONS = Object.freeze([
+  'falsify-freeze-56d2fb7e',  // Freeze-Stand, gegen den readSnapshot/getestet wurde
+]);
 
-export function checkContract(env = process.env) {
-  const configured = String(env.FALSIFYME_CONTRACT_SHA || '').trim();
-  const effective = configured || EXPECTED_FALSIFYME_CONTRACT_SHA;
-  if (effective !== EXPECTED_FALSIFYME_CONTRACT_SHA) {
-    return { ok: false, reason: 'CONTRACT_MISMATCH', expected: EXPECTED_FALSIFYME_CONTRACT_SHA, configured: effective };
+/** Generischer Vertrags-Check: adapterContract kommt vom ADAPTER (Funktion/
+ *  Objekt des Ports), nicht aus der Prozess-Env. fail-closed bei alles anderem
+ *  als einer unterstützten Version. */
+export function checkAdapterContract(adapterContract, {
+  supported = SUPPORTED_CONTRACT_VERSIONS,
+} = {}) {
+  // Nur zwei legitime Port-Formen: Objekt mit contract_version ODER bare String.
+  // Alles andere (null, {}, Funktionen ohne Ergebnis) ist ein Vertragsbruch und
+  // wird als 'leer' gemeldet — kein '[object Object]'-Geräusch.
+  const raw = (adapterContract !== null && typeof adapterContract === 'object')
+    ? adapterContract.contract_version
+    : adapterContract;
+  const version = (typeof raw === 'string' || typeof raw === 'number') ? String(raw).trim() : '';
+  if (!version) {
+    return { ok: false, reason: 'CONTRACT_MISMATCH', expected: [...supported], configured: '(leer — Adapter meldet keine Vertrags-Version)' };
   }
-  return { ok: true, sha: effective };
+  if (!supported.includes(version)) {
+    return { ok: false, reason: 'CONTRACT_MISMATCH', expected: [...supported], configured: version };
+  }
+  return { ok: true, contract_version: version };
 }
