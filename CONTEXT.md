@@ -51,7 +51,7 @@ Zwei Einstiege:
 |---|-----------|-----|---------|
 | K1 | falsify.db-Schema in rohem SQL | **GELÖST 2026-09-06 (doki-Commit 18a499b):** falsify-adapter.mjs ist EINZIGER Schema-Kenner; db.mjs falsify-frei; falsify-reader/rotation als Delegations-Shims; Single-Knower-Invariante im mirror.test.mjs statisch eingefroren |
 | K2 | FM-Event-Vokabular | **GELÖST 2026-09-06 (18a499b):** doki/src/vocabulary.mjs — DOKI_EVENT_TYPES v1 (CLAIM/CHALLENGE/LIFECYCLE/VERDICT/HANDOFF/COMPLETION/DIAGNOSTIC), normalizeEvent als EINZIGE Übersetzungsstelle (wireType bleibt als Beweis); Consumer vergleichen nur DOKI-Typen; thinker_start/done als benannte Konstante im Adapter; eventSignal markiert DOKI_VOCABULARY vs FM_EVT_LEGACY |
-| K3 | Contract-SHA auf FalsifyMe-Freeze-Commit gepinnt, Mismatch → UNAVAILABLE | contracts.mjs:17 (EXPECTED_FALSIFYME_CONTRACT_SHA + Env), runtime.mjs:210 | HART |
+| K3 | Contract-SHA auf FalsifyMe-Freeze-Commit gepinnt | **GELÖST + REWORKT 2026-09-06 (doki-Commit b053423):** Env-Pin entfernt; checkAdapterContract (contracts.mjs) prüft die vom ADAPTER gemeldete contract_version gegen SUPPORTED_CONTRACT_VERSIONS (DOKIs eigene Liste); processEvent nimmt adapterContract als injizierbaren Port; fail-closed bleibt (fremd/leer → UNAVAILABLE) |
 | K4 | Thinker-Slot = FalsifyMe-Wahrheit (Kill-Switch über falsify.db) | rotation.mjs:3-21, model.mjs:18, runtime.mjs:164/183/189/191 | HART, aber Signaturen für Ports existieren (thinker-orchestrator.mjs:10) |
 | K5 | Config/Modell-Wahrheit: Produktion = Provider von FalsifyMe INJIZIERT; nur CLI liest DOKI_*-Env | bridge.mjs:89, 106-109; model.mjs:10-15 | HALB — "eigene API" existiert nur im CLI-Pfad |
 | K6 | DOKI lebt physisch IM FalsifyMe-Checkout; FalsifyMe-Worker importiert bridge (lazy, fail-open) | ui/worker.mjs (FalsifyMe-Repo) → doki/src/bridge.mjs | HART — das Import-Verhältnis ist umgekehrt zur neuen Zweckbestimmung |
@@ -165,8 +165,7 @@ narrator-catalog, persistent-store, reconstruction, replay, runtime.
 5. Keine cause_event_id-Kette im Beziehungszustand — die
    Anti-Kontaminations-Regel aus dem Plan ist noch nicht Code.
 6. Orphan-Daten nach Narrator-Reduktion unbehandelt.
-7. Contract-SHA-Pin (K3) macht das doki-Repo allein nicht lauffähig
-   ohne falsify-Seite.
+7. ~~Contract-SHA-Pin (K3) macht das doki-Repo allein nicht lauffähig~~ GELÖST (b053423): generischer Adapter-Vertrag, kein Env-Pin, kein fremder Commit in DOKIs Identität.
 8. M1-M3-Messkriterien existieren nur im Plan — es gab NULL
    Messungen der Prompt-Qualität. Alle "gute Ergebnisse"-Aussagen
    sind unbelegt.
