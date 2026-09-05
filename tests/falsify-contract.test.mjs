@@ -28,6 +28,7 @@ import { join } from 'node:path';
 import test from 'node:test';
 import { createPersistentStore } from '../src/observer-store.mjs';
 import { createBridge } from '../src/bridge.mjs';
+import { VOCABULARY_VERSION, DOKI_EVENT_TYPES, WIRE_TO_DOKI, normalizeEvent } from '../src/vocabulary.mjs';
 
 // Windows: SQLite-Handles MÜSSEN vor rmSync geschlossen sein (sonst EPERM).
 async function withStore(fn) {
@@ -45,7 +46,7 @@ async function withStore(fn) {
 // aus dem ROH-Event (fmEvtSourceId), Envelope-Felder nur als Metadaten.
 const fmevt = (t, extra = {}) => ({ t, ts: 1, ...extra });
 
-test('Vokabular: FM-EVT t wird als event_type beobachtet (job/finding/loop/handoff/scope_auto)', () => {
+test('Vokabular K2: FM-EVT t wird als DOKI-Typ beobachtet (wireType bleibt als Beweis)', () => {
   withStore((store) => {
     const doki = createBridge({
       store,
@@ -65,18 +66,28 @@ test('Vokabular: FM-EVT t wird als event_type beobachtet (job/finding/loop/hando
       assert.equal(r.accepted, true, `Event ${e.t} muss akzeptiert werden`);
     }
     const rows = store.list();
-    // Vokabular-Bruecke: jedes Live-Event traegt seinen Typ (nicht null).
-    for (const [t, n] of [['job', 1], ['finding', 1], ['loop', 2], ['handoff', 1], ['scope_auto', 1]]) {
+    // K2-Bruecke: jedes Live-Event traegt einen DOKI-Typ (nicht null) und den
+    // Original-Wire-Namen als Beweis.
+    for (const [t, n] of [['CLAIM', 2], ['CHALLENGE', 1], ['LIFECYCLE', 2], ['HANDOFF', 1]]) {
       const typed = rows.filter((o) => o.event_type === t);
-      assert.equal(typed.length, n, `observation(s) mit event_type=${t}`);
+      assert.equal(typed.length, n, `observation(s) mit DOKI-Typ=${t}`);
     }
+    for (const row of rows) {
+      assert.ok(DOKI_EVENT_TYPES.includes(row.event_type), `DOKI-Typ: ${row.event_type}`);
+      assert.ok(row.event.wireType, `wireType als Beweis erhalten: ${row.event.wireType}`);
+      assert.equal(row.event.vocabulary, VOCABULARY_VERSION, 'Vokabular-Version gestempelt');
+    }
+    // Original-Namen sind im Event-JSON als wireType sichtbar (Producer-Wahrheit).
+    assert.deepEqual(rows.filter((o) => o.event_type === 'LIFECYCLE').map((o) => o.event.wireType).sort(),
+      ['loop', 'loop']);
+    assert.equal(rows.find((o) => o.event_type === 'HANDOFF').event.wireType, 'handoff');
     // Loop-Zustaende + Prüfauftrag sind im Event-JSON sichtbar (UI-123/128).
-    const handoff = rows.find((o) => o.event_type === 'handoff');
+    const handoff = rows.find((o) => o.event_type === 'HANDOFF');
     assert.equal(handoff.event.id, 'handoff-ui137');
     assert.equal(handoff.event.ticket, 'Ticket 1:1');
-    assert.deepEqual(rows.filter((o) => o.event_type === 'loop').map((o) => o.event.s).sort(),
+    assert.deepEqual(rows.filter((o) => o.event_type === 'LIFECYCLE').map((o) => o.event.s).sort(),
       ['LOOP_BLOCKED', 'WRITE_AUTHORIZED']);
-    assert.equal(rows.find((o) => o.event_type === 'scope_auto').event.outcome, 'continue');
+    assert.equal(rows.find((o) => o.event_type === 'CLAIM' && o.event.wireType === 'scope_auto').event.outcome, 'continue');
     // Duplikat-Lieferung desselben Inhalts bleibt exactly-once.
     const dup = doki.ingest({ ...fmevt('handoff', { id: 'handoff-ui137', ticket: 'Ticket 1:1', probes: 3 }), job: 'job-a', session: 'scope-a' });
     assert.equal(dup.duplicate, true, 'identischer Inhalt dedupliziert');
@@ -144,10 +155,12 @@ test('UI-137 externer-Writer-Loop: WRITE-Strom → stille Luecke (report/complet
     // Durable Nachweis: der Loop-Verlauf des externen Writers ist nach Typ
     // und Reihenfolge sichtbar (WRITE_AUTHORIZED … RE_REVIEW_RUNNING) — die
     // Off-Stream-Luecke (report/complete) hinterlaesst KEINE Observation.
-    const loops = store.list().filter((o) => o.event_type === 'loop').map((o) => o.event.s);
+    const loops = store.list()
+      .filter((o) => o.event_type === 'LIFECYCLE' && o.event.wireType === 'loop')
+      .map((o) => o.event.s);
     assert.deepEqual(loops, ['WRITE_AUTHORIZED', 'RE_REVIEW_RUNNING'],
       'Loop-Transitionen des UI-137-Workflows im Event-Vokabular sichtbar');
-    assert.equal(store.list().filter((o) => o.event_type === 'handoff').length, 1);
+    assert.equal(store.list().filter((o) => o.event_type === 'HANDOFF').length, 1);
     // Keine Observation zwischen den Job-Stroemen: die stille Luecke (report/
     // complete) hinterlaesst nichts — nur die echten FM-EVT der zwei Jobs.
     assert.equal(store.list().length, phaseA.length + phaseB.length,

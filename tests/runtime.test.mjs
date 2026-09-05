@@ -4,13 +4,12 @@ import { tmpdir } from 'node:os';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { openDokiDb, openReadOnlyFalsifyDb } from '../src/db.mjs';
+import { openDokiDb } from '../src/db.mjs';
+import { openReadOnlyFalsifyDb, sharedKeyWindowOpen, readSnapshot, listTerminalEvents } from '../src/falsify-adapter.mjs';
 import { processEvent } from '../src/runtime.mjs';
 import { digestJson } from '../src/hash.mjs';
 import { RUNTIME_VERSION, TERMINAL_STATES } from '../src/contracts.mjs';
 import { resolveSwitches } from '../src/model.mjs';
-import { sharedKeyWindowOpen } from '../src/rotation.mjs';
-import { readSnapshot, listTerminalEvents } from '../src/falsify-reader.mjs';
 
 function fixture(activeState='DONE') {
   const dir = mkdtempSync(join(tmpdir(), 'doki-'));

@@ -158,25 +158,27 @@ export class EnsembleState {
 //   - recallCount: Anzahl der gesehenen Events
 //
 // Regeln für die Zuordnung von Events zu Characters (Etappe 1, deterministisch,
-// Rollen über ROLE_MAP aus narrator-catalog.mjs — keine verdrahteten Namen):
-//   event_type='job'      → primary: ROLE_MAP.analysis (Aufgabe beobachtet)
-//   event_type='finding'  → primary: Charakter abhängig vom wave-Feld
-//     wave='evil'/'evil-twin' → ROLE_MAP.attack (Angriff) + ROLE_MAP.analysis (Verteidigung)
-//     sonst               → ROLE_MAP.analysis
-//   event_type='handoff'  → ROLE_MAP.analysis + ROLE_MAP.attack
-//   sonst                 → ROLE_MAP.analysis (Default)
+// Rollen über ROLE_MAP, Typen über DOKI-Vokabular — keine Producer-Namen):
+//   type='CLAIM'     → primary: ROLE_MAP.analysis (Anforderung beobachtet)
+//   type='CHALLENGE' → wave='evil'/'evil-twin': ROLE_MAP.attack + ROLE_MAP.analysis
+//                      sonst: ROLE_MAP.analysis
+//   type='HANDOFF'   → ROLE_MAP.analysis + ROLE_MAP.attack
+//   LIFECYCLE/VERDICT/COMPLETION → ROLE_MAP.analysis (Default)
 //
 // Numerische Emotional/Relationship-Deltas kommen in Etappe 3 (Step C).
 // Diese Funktion ist REIN: keine IO, kein DB, keine LLM-Calls, keine Mutation
 // des Inputs. Replay mit denselben Events erzeugt identisches Ergebnis.
 
 function eventCharacters(event) {
-  const t = event?.event_type ?? event?.t ?? event?.type ?? null;
+  // K2 (Schritt 2): Routing entscheidet über DOKI-Typen (vocabulary.mjs);
+  // wave ist Producer-Daten und bleibt als Nebensignal erlaubt.
+  const t = event?.type ?? event?.event_type ?? event?.t ?? null;
   const wave = event?.wave ?? null;
-  if (t === 'finding' && (wave === 'evil' || wave === 'evil-twin')) {
+  if (t === 'CHALLENGE' && (wave === 'evil' || wave === 'evil-twin')) {
     return [ROLE_MAP.attack, ROLE_MAP.analysis];
   }
-  if (t === 'handoff') return [ROLE_MAP.analysis, ROLE_MAP.attack];
+  if (t === 'CHALLENGE' || t === 'HANDOFF') return [ROLE_MAP.analysis, ROLE_MAP.attack];
+  if (t === 'CLAIM' || t === 'LIFECYCLE' || t === 'VERDICT' || t === 'COMPLETION') return [ROLE_MAP.analysis];
   return [ROLE_MAP.analysis];
 }
 

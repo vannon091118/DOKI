@@ -3,14 +3,14 @@ import { buildHistory, correlation } from './history.mjs';
 import { compilePrompt, detectInstructionLikeData } from './prompt.mjs';
 import { callModel, modelForAction, activeThinkerRunExists } from './model.mjs';
 import { RUNTIME_VERSION, checkContract } from './contracts.mjs';
-import { inspectEventContinuity, readSnapshot } from './falsify-reader.mjs';
-import { sharedKeyWindowOpen } from './rotation.mjs';
+import { inspectEventContinuity, readSnapshot, sharedKeyWindowOpen } from './falsify-adapter.mjs';
 import { buildNarratorContext } from './narrator-context.mjs';
 import { narrateOnce } from './thinker-orchestrator.mjs';
 import { etats } from './etats.mjs';
 import { patternKey } from './signals.mjs';
 import { selectBlocks } from './blocks.mjs';
 import { ROLE_MAP } from './narrator-catalog.mjs';
+import { normalizeEvent } from './vocabulary.mjs';
 import { projectEnsemble, accumulateEtats } from './ensemble-state.mjs';
 
 
@@ -107,10 +107,10 @@ function deriveEnsembleAndRelevance(snapshot, report) {
   // und wird von projectEnsemble korrekt ins Ensemble übersetzt.
   const accumulationEvents = [];
 
-  // Scope-Header als erstes "job"-Event
+  // Scope-Header als erstes CLAIM-Event (DOKI-Vokabular)
   if (snapshot.scope?.header) {
     accumulationEvents.push({
-      t: 'job',
+      type: 'CLAIM',
       id: `scope-${snapshot.scope.id ?? 'header'}`,
       seq: 0,
       phase: report.phase,
@@ -124,8 +124,7 @@ function deriveEnsembleAndRelevance(snapshot, report) {
   for (let i = 0; i < findings.length; i++) {
     const f = findings[i];
     accumulationEvents.push({
-      t: 'finding',
-      event_type: 'finding',
+      type: 'CHALLENGE',
       id: String(f.id ?? `finding-${i}`),
       seq: i + 1,
       phase: report.phase,
@@ -135,11 +134,13 @@ function deriveEnsembleAndRelevance(snapshot, report) {
     });
   }
 
-  // Loop-Event selbst als letztes
+  // Loop-Event selbst als letztes — DOKI-Typ via normalizeEvent (EINZIGE
+  // Übersetzungsstelle; unknown → DIAGNOSTIC ist hier unnötig, Snapshot-Typen
+  // sind aus der Adapter-DB und bereits verdrahtet bekannt).
+  const loopWireType = snapshot.loop_event?.event_type ?? null;
+  const loopNormalized = loopWireType ? normalizeEvent({ event_type: loopWireType }) : null;
   accumulationEvents.push({
-    t: snapshot.loop_event?.event_type && ['phase', 'finding', 'verdict', 'done', 'job', 'loop'].includes(snapshot.loop_event.event_type)
-      ? snapshot.loop_event.event_type
-      : 'loop',
+    type: loopNormalized?.type ?? 'LIFECYCLE',
     id: snapshot.loop_event?.id ?? 'loop-event',
     seq: accumulationEvents.length + 1,
     phase: report.phase,

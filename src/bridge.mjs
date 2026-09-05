@@ -40,6 +40,7 @@ import { etats } from './etats.mjs';
 import { patternKey } from './signals.mjs';
 import { selectBlocks } from './blocks.mjs';
 import { ROLE_MAP } from './narrator-catalog.mjs';
+import { normalizeEvent } from './vocabulary.mjs';
 import { projectEnsemble, accumulateEtats } from './ensemble-state.mjs';
 import { digestJson } from './hash.mjs';
 
@@ -144,11 +145,13 @@ export function createBridge({
       // Reihenfolge: Identitaet ZUERST aus dem ROH-Event stampen (stabil
       // ueber Sidecars/Restarts), DANN t->event_type mappen — die Mapping-
       // Erweiterung darf die Content-Identitaet nicht veraendern.
+      // K2 (Schritt 2): normalizeEvent ist die EINZIGE Übersetzungsstelle
+      // Wire→DOKI. Die Observation trägt event_type (DOKI-Typ), wireType
+      // (Original-Name als Beweis) und die Vokabular-Version.
       const withIdentity = {
-        ...event,
+        ...normalizeEvent(event),
         source_event_id: event?.source_event_id ?? fmEvtSourceId(event),
         source: event?.source ?? 'falsify-fmevt',
-        event_type: event?.event_type ?? event?.type ?? event?.t ?? null,
       };
       const result = observer.ingest(withIdentity);
       if (result.accepted && observer.state === 'COLLECTING' && slotState() === 'BUSY') {
@@ -221,8 +224,8 @@ export function createBridge({
         // Narrative-Kontext aus DURABLE Observations (Restart-sicher, nicht RAM).
         const evidence = pending.map((o) => ({ id: o.id, source_event_id: o.source_event_id, event_type: o.event_type, text: o.observed_text, at: o.observed_at }));
         const care = {
-          CLAIM: pending.find((o) => o.event_type === 'job')?.observed_text ?? null,
-          ATTACK: pending.filter((o) => o.event_type === 'finding').map((o) => o.observed_text),
+          CLAIM: pending.find((o) => o.event_type === 'CLAIM')?.observed_text ?? null,
+          ATTACK: pending.filter((o) => o.event_type === 'CHALLENGE').map((o) => o.observed_text),
           RE_EVALUATE: { observations: pending.length, last: pending.at(-1)?.observed_text ?? null },
           EVIDENCE: evidence.map((e) => e.id),
         };
@@ -235,8 +238,8 @@ export function createBridge({
           block_id: `obs-${e.id ?? idx}`,
           anchor_ok: Boolean(e.source_event_id),
           state_key: stateKey,
-          primitive: e.event_type === 'finding' ? 'CONTRADICTION' : 'CLAIM',
-          character: e.event_type === 'finding' ? ROLE_MAP.attack : ROLE_MAP.analysis,
+          primitive: e.event_type === 'CHALLENGE' ? 'CONTRADICTION' : 'CLAIM',
+          character: e.event_type === 'CHALLENGE' ? ROLE_MAP.attack : ROLE_MAP.analysis,
         }));
         const selected = selectBlocks(candidateBlocks, stateKey).slice(0, 7);
         const relevantCharacters = [...new Set(selected.map((b) => b.block.character).filter(Boolean))];
@@ -245,8 +248,8 @@ export function createBridge({
         // ── Akkumulierter etats-State (Etappe 1) ────────────────────────────
         // Alle pending-Observations als geordnete Event-Liste akkumulieren.
         const accumulationEvents = pending.map((o, idx) => ({
-          t: o.event_type ?? 'loop',
-          event_type: o.event_type ?? 'loop',
+          t: o.event_type ?? 'LIFECYCLE',
+          event_type: o.event_type ?? 'LIFECYCLE',
           id: o.source_event_id ?? o.id ?? `bridge-evt-${idx}`,
           seq: o.seq ?? idx,
           phase: 'bridge',

@@ -4,10 +4,6 @@ import { DatabaseSync } from 'node:sqlite';
 
 export const DOKI_SCHEMA_VERSION = 2;
 
-export function openReadOnlyFalsifyDb(path) {
-  return new DatabaseSync(resolve(path), { readOnly: true, timeout: 250 });
-}
-
 function applySchemaV1(db) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS observations(

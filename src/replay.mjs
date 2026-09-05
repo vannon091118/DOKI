@@ -1,5 +1,5 @@
 import { digestJson } from './hash.mjs';
-import { listTerminalEvents } from './falsify-reader.mjs';
+import { listTerminalEvents } from './falsify-adapter.mjs';
 import { processEvent } from './runtime.mjs';
 
 export const REPLAY_RULE_VERSION = 'doki-replay-v1';

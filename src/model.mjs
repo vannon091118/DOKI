@@ -1,5 +1,6 @@
 import { digestJson } from './hash.mjs';
-import { ACTIVE_STATES, DEFAULT_MAX_RESWITCH } from './contracts.mjs';
+import { DEFAULT_MAX_RESWITCH } from './contracts.mjs';
+import { activeThinkerRunExists } from './falsify-adapter.mjs';
 
 function now() { return new Date().toISOString(); }
 
@@ -13,11 +14,6 @@ function apiConfig(env = process.env) {
     maxCalls: Number(env.DOKI_MAX_CALLS || 6),
     tokenBudget: Number(env.DOKI_TOKEN_BUDGET || 1500),
   };
-}
-
-function activeThinkerRunExists(fdb) {
-  const marks = ACTIVE_STATES.map(() => '?').join(', ');
-  return Boolean(fdb.prepare(`SELECT 1 FROM jobs WHERE loop_state IN (${marks}) LIMIT 1`).get(...ACTIVE_STATES));
 }
 
 export function modelForAction(action, env = process.env) {

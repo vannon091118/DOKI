@@ -3,10 +3,10 @@
 
 export const DOKI_SIGNAL_SOURCE = Object.freeze({
   FM_EVT: 'ui/tui/events.mjs',
-  FALSIFY_SNAPSHOT: 'doki/src/falsify-reader.mjs',
+  FALSIFY_SNAPSHOT: 'doki/src/falsify-adapter.mjs',
   CHARACTER_AXES: 'doki/src/ensemble-state.mjs',
   REACTIVITY_AXES: 'doki/src/narrator-catalog.mjs',
-  LOOP_STATES: 'artifacts/loops.mjs',
+  LOOP_STATES: 'falsify-adapter.mjs (FM-Interrogation)',
 });
 
 export const FM_EVENT_TYPES = Object.freeze([
@@ -60,11 +60,25 @@ export function patternKey({ phase, verdict, wave }) {
   return [String(phase ?? ''), String(verdict ?? ''), String(wave ?? '')].join('|');
 }
 
+// K2 (Schritt 2): eventSignal akzeptiert DOKI-Typen (CLAIM/CHALLENGE/…,
+// eigene Sprache seit vocabulary.mjs) UND Legacy-Wire-Typen (FM-Namen) —
+// letztere nur noch für Replay alter Event-Ketten, ehrlich als Quelle markiert.
+import { DOKI_EVENT_TYPES } from './vocabulary.mjs';
+
 export function eventSignal(event) {
   if (!event || typeof event !== 'object' || typeof event.t !== 'string') return null;
+  if (DOKI_EVENT_TYPES.includes(event.t)) {
+    return Object.freeze({
+      source: 'DOKI_VOCABULARY',
+      type: event.t,
+      eventId: event.id ?? null,
+      seq: Number.isInteger(event.seq) ? event.seq : null,
+      payload: event,
+    });
+  }
   if (!FM_EVENT_TYPES.includes(event.t)) return null;
   return Object.freeze({
-    source: 'FM_EVT',
+    source: 'FM_EVT_LEGACY',
     type: event.t,
     eventId: event.id ?? null,
     seq: Number.isInteger(event.seq) ? event.seq : null,

@@ -40,7 +40,7 @@ test('machine cannot infer narrative relevance from model output', () => {
     ladder: () => 'NARRATIVELY_RELEVANT',
   });
   assert.equal(result.decisions.prompt_eligible, true);
-  assert.equal(result.derived.signal.source, 'FM_EVT');
+  assert.equal(result.derived.signal.source, 'FM_EVT_LEGACY', 'Legacy-Wire-Typ wird ehrlich markiert');
   assert.equal(result.state.text, 'this should not become authority');
   // The state transition itself contains no model-score field and does not call a model.
   assert.equal(Object.hasOwn(result, 'creative_score'), false);
@@ -67,16 +67,16 @@ test('accumulateEtats: leere Event-Liste → leerer Stage-State ohne Fehler', ()
 
 test('accumulateEtats: 3 Events → akkumulierter State enthält knownEvents pro Character', () => {
   const events = [
-    { t: 'job', id: 'e1', seq: 1, phase: 'PLAN', v: 'PLAN', wave: null },
-    { t: 'finding', event_type: 'finding', id: 'e2', seq: 2, phase: 'PLAN', v: 'PLAN', wave: 'evil' },
-    { t: 'loop', id: 'e3', seq: 3, phase: 'PLAN', v: 'PLAN', wave: null },
+    { t: 'CLAIM', id: 'e1', seq: 1, phase: 'PLAN', v: 'PLAN', wave: null },
+    { t: 'CHALLENGE', event_type: 'CHALLENGE', id: 'e2', seq: 2, phase: 'PLAN', v: 'PLAN', wave: 'evil' },
+    { t: 'LIFECYCLE', id: 'e3', seq: 3, phase: 'PLAN', v: 'PLAN', wave: null },
   ];
   const state = accumulateEtats(events, { ladder: () => 'NARRATIVELY_RELEVANT' });
-  // 'job'-Event → ROLE_MAP.analysis (Squizzle) sieht e1
-  assert.ok(state.characters['Squizzle']?.knownEvents.includes('e1'), 'Squizzle kennt job-Event');
-  // 'finding' mit wave='evil' → ROLE_MAP.attack (Buffy) + ROLE_MAP.analysis (Squizzle) sehen e2
-  assert.ok(state.characters['Buffy']?.knownEvents.includes('e2'), 'Buffy kennt evil-finding');
-  assert.ok(state.characters['Squizzle']?.knownEvents.includes('e2'), 'Squizzle kennt evil-finding');
+  // CLAIM-Event → ROLE_MAP.analysis (Squizzle) sieht e1
+  assert.ok(state.characters['Squizzle']?.knownEvents.includes('e1'), 'Squizzle kennt CLAIM-Event');
+  // CHALLENGE mit wave='evil' → ROLE_MAP.attack (Buffy) + ROLE_MAP.analysis (Squizzle) sehen e2
+  assert.ok(state.characters['Buffy']?.knownEvents.includes('e2'), 'Buffy kennt evil-CHALLENGE');
+  assert.ok(state.characters['Squizzle']?.knownEvents.includes('e2'), 'Squizzle kennt evil-CHALLENGE');
   // recallCount stimmt
   assert.ok(state.characters['Squizzle']?.recallCount >= 2, 'Squizzle hat mind. 2 Recalls');
   assert.ok(state.characters['Buffy']?.recallCount >= 1, 'Buffy hat mind. 1 Recall');

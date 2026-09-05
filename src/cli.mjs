@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { existsSync } from 'node:fs';
-import { openDokiDb, openReadOnlyFalsifyDb } from './db.mjs';
-import { listTerminalEvents } from './falsify-reader.mjs';
+import { openDokiDb } from './db.mjs';
+import { openReadOnlyFalsifyDb, listTerminalEvents } from './falsify-adapter.mjs';
 import { processEvent } from './runtime.mjs';
 import { replayTerminalEvents, resetReplayCursor } from './replay.mjs';
 
