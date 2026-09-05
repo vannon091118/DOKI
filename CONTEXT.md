@@ -49,12 +49,17 @@ Zwei Einstiege:
 
 | # | Koppelung | Ort | Zustand |
 |---|-----------|-----|---------|
-| K1 | falsify.db-Schema in rohem SQL (loop_events, jobs, findings, scopes, checkouts, projects) | falsify-reader.mjs:14-23, db.mjs:7-8 (openReadOnlyFalsifyDb), rotation.mjs:5+26, model.mjs:18 | HART — DOKI kennt fremde Tabellen |
-| K2 | FM-Event-Vokabular eingefroren (FM_EVENT_TYPES, LOOP_STATES, VERDICT_CODES; t→event_type-Mapping; thinker_start/done) | signals.mjs:12-64, bridge.mjs:138-150, rotation.mjs:17-19 | HART |
+| K1 | falsify.db-Schema in rohem SQL | **GELÖST 2026-09-06 (doki-Commit 18a499b):** falsify-adapter.mjs ist EINZIGER Schema-Kenner; db.mjs falsify-frei; falsify-reader/rotation als Delegations-Shims; Single-Knower-Invariante im mirror.test.mjs statisch eingefroren |
+| K2 | FM-Event-Vokabular | **GELÖST 2026-09-06 (18a499b):** doki/src/vocabulary.mjs — DOKI_EVENT_TYPES v1 (CLAIM/CHALLENGE/LIFECYCLE/VERDICT/HANDOFF/COMPLETION/DIAGNOSTIC), normalizeEvent als EINZIGE Übersetzungsstelle (wireType bleibt als Beweis); Consumer vergleichen nur DOKI-Typen; thinker_start/done als benannte Konstante im Adapter; eventSignal markiert DOKI_VOCABULARY vs FM_EVT_LEGACY |
 | K3 | Contract-SHA auf FalsifyMe-Freeze-Commit gepinnt, Mismatch → UNAVAILABLE | contracts.mjs:17 (EXPECTED_FALSIFYME_CONTRACT_SHA + Env), runtime.mjs:210 | HART |
 | K4 | Thinker-Slot = FalsifyMe-Wahrheit (Kill-Switch über falsify.db) | rotation.mjs:3-21, model.mjs:18, runtime.mjs:164/183/189/191 | HART, aber Signaturen für Ports existieren (thinker-orchestrator.mjs:10) |
 | K5 | Config/Modell-Wahrheit: Produktion = Provider von FalsifyMe INJIZIERT; nur CLI liest DOKI_*-Env | bridge.mjs:89, 106-109; model.mjs:10-15 | HALB — "eigene API" existiert nur im CLI-Pfad |
 | K6 | DOKI lebt physisch IM FalsifyMe-Checkout; FalsifyMe-Worker importiert bridge (lazy, fail-open) | ui/worker.mjs (FalsifyMe-Repo) → doki/src/bridge.mjs | HART — das Import-Verhältnis ist umgekehrt zur neuen Zweckbestimmung |
+
+Nachtrag 2026-09-06 (18a499b): K1+K2 GELÖST (siehe oben); Tests 85/85 grün;
+Spiegel-Ausnahme: falsify-adapter.mjs ist der einzige legitime Handle-Bauer,
+Shims (falsify-reader/rotation) fliegen im K4-Schritt. NÄCHSTER SCHRITT: K4
+(Slot-Gate als injizierte shouldRun/shouldAbort-Ports).
 
 ## 4. Ensembles / Narratoren (IST nach RW-100-Schnitt 2026-09-06)
 
