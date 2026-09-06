@@ -61,12 +61,17 @@ Spiegel-Ausnahme: falsify-adapter.mjs ist der einzige legitime Handle-Bauer,
 Shims (falsify-reader/rotation) fliegen im K4-Schritt. NÄCHSTER SCHRITT: K4
 (Slot-Gate als injizierte shouldRun/shouldAbort-Ports).
 
-## 4. Ensembles / Narratoren (IST nach RW-100-Schnitt 2026-09-06)
+## 4. Ensembles / Narratoren (IST nach RW-100-Schnitt 2026-09-06, Buffy-Entfernung)
 
-- 14 Profile als ARCHIV (unverändert im Code), aktiv NUR:
-  Buffy (attack), Squizzle (analysis), Null (Langzeit-Arc).
+- 13 Profile als ARCHIV (Buffy-Zeile am 2026-09-06 AUS dem Katalog
+  entfernt — Plattform-Agent-Identität gehört nicht in DOKIs Daten;
+  Indizes 1..13 renummiert), aktiv NUR:
+  Squizzle (analysis), Null (Langzeit-Arc), Argos (attack).
 - ROLE_MAP im catalog = EINZIGE Quelle des Event-Routings
-  (vorher: 'Thinker'/'Buffy' hart in 3 Dateien — bereinigt).
+  (vorher: 'Thinker' hart in 3 Dateien — bereinigt).
+- Test-Guards frieren die Entfernung ein: narratorByName('Buffy') und
+  activeNarratorByName('Buffy') MUESSEN werfen (fail-closed, Alarm falls
+  die Identitaet je zurueckkommt).
 - userProxy = 'Vannon' archiviert, wird nur für Replay-Historie
   referenziert — ACHTUNG: runtime.mjs:78 schreibt scope-CLAIMs
   weiterhin Vannon zu; der Character hat aber KEINEN Ensemble-State

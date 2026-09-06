@@ -1,1004 +1,749 @@
-Ja. Ich rekonstruiere den konzeptionellen Verlauf **ab „Basis-Identität“** und trenne dabei sauber zwischen **festgelegt**, **stark favorisiert** und **noch offen**. Keine neue Architektur hineininterpretieren.
+# Doki Architecture Contract v0.1
+
+## Zweck
+
+Dieser Vertrag definiert die unverzichtbaren semantischen Grenzen von Doki.
+
+Er beschreibt nicht, wie eine konkrete Datenbank, Klasse oder API implementiert werden muss. Er definiert, was das System **bedeuten muss**, welche Zustände zulässig sind und welche Übergänge verboten sind.
+
+Eine Implementierung ist nur konform, wenn sie diese Regeln reproduzierbar erfüllen kann.
 
 ---
 
-# Rekonstruktion ab „Basis-Identität“
+# IDENTITY
 
-## 1. Basis-Identität
+## DOKI-IDENT-001 — Actor Identity
 
-Ausgangspunkt war:
+### Definition
 
-> Basis-Identität wird vorgegeben und bleibt gleich.
-
-Dann wurde präzisiert:
-
-```text
-ACTOR
-├── actor_id
-├── BASE IDENTITY
-└── EMERGENT
-```
-
-Die gedachte Semantik war:
+Ein Actor ist eine persistente technische Einheit mit:
 
 ```text
 actor_id
-= technische Kontinuität
-
-base_identity
-= bewusst gesetzter, stabiler Kern
-
-emergent
-= das, was durch Geschichte entsteht
-```
-
-Dabei wurde entschieden:
-
-```text
-BASE IDENTITY
-   ↓
-FREEZE
-   ↓
-bleibt Basis
-```
-
-Emergente Entwicklung darf die Basis **nicht retconnen**.
-
-Beispiel:
-
-```text
-BASE:
-"geduldig"
-
-HISTORIE:
-wiederholt ungeduldiges Verhalten
-
-        ↓
-
-EMERGENT:
-Ungeduld ↑
-
-BASE bleibt trotzdem "geduldig".
-```
-
-Wichtig war also die Trennung:
-
-```text
-IDENTITY ≠ CURRENT STATE
-```
-
-Noch offen blieb damals:
-
-* Exakte Semantik von `persona_id`
-* Ob `persona_id` überhaupt nötig ist
-* Welche Bestandteile genau frozen sind
-* Wie stark emergente Entwicklung gehen darf
-* Was „same actor tomorrow“ technisch exakt voraussetzt
-
----
-
-# 2. Onboarding für die Basis-Identität
-
-Dann kam die Idee:
-
-Nicht manuell alles konfigurieren, sondern ein **Mini-Q&A**.
-
-Zunächst entstand kurz die Idee von Multiple Choice, wurde aber korrigiert.
-
-Das eigentliche Ziel:
-
-```text
-RUNTIME
-  ↓
-gezielte elementare Fragen
-  ↓
-USER antwortet frei
-  ↓
-LLM klassifiziert
-  ↓
-strukturierte Basis-Identität
-  ↓
-FREEZE
-```
-
-Wichtig:
-
-**Die Fragen sind bewusst konstruiert. Die Antworten bleiben frei.**
-
-Also:
-
-```text
-FRAGEN = kontrolliert
-ANTWORTEN = offen
-AUSWERTUNG = constrained
-```
-
-Die LLM soll dabei nicht Persönlichkeit erfinden, sondern aus der Antwort innerhalb eines festen Schemas extrahieren.
-
----
-
-# 3. Die Fragen selbst sollen Informationsdichte besitzen
-
-Dann kam die entscheidende Verschiebung:
-
-Die Fragen sollen **nicht zufällig im technischen Sinn** sein.
-
-Für den User:
-
-```text
-wirkt natürlich / teilweise random
-```
-
-Für die Runtime:
-
-```text
-gezielte Auswahl
-```
-
-Die Fragen werden nach Coverage ausgewählt.
-
-```text
-QUESTION POOL
-      ↓
-welche Dimensionen fehlen?
-      ↓
-welche Frage liefert mehrere davon?
-      ↓
-Redundanz / Balance
-      ↓
-seeded Auswahl
-```
-
-Wichtige Idee:
-
-```text
-eine Frage
-   ↓
-mehrere Traits
-```
-
-und dieselbe Dimension kann aus verschiedenen Winkeln geprüft werden.
-
-Damit:
-
-```text
-Frage A ─┐
-Frage B ─┼──► konsistente Evidenz
-Frage C ─┘
-```
-
-Die Auswahl soll also **deterministisch gesteuert zufällig erscheinen**, nicht stumpf zufällig sein.
-
----
-
-# 4. „Garbage“ wurde als eigenes Architekturproblem erkannt
-
-Dann kam:
-
-> Was passiert bei `iuaghijg`?
-
-Es wurde wichtig, **Garbage nicht mit „komisch“ gleichzusetzen**.
-
-Es entstanden drei Kategorien:
-
-```text
-TYPUS
-UNKLAR
-GARBAGE
-```
-
-Zum Beispiel:
-
-```text
-"kommt drauf an"
-→ Typus
-
-"keine Ahnung"
-→ Typus / niedrige Informationsdichte
-
-"Ich will das nicht beantworten."
-→ Verweigerung / Signal
-
-"iuaghijg"
-→ Garbage
-```
-
-Dann wurde noch präzisiert:
-
-```text
-GARBAGE ≠ UNKLAR ≠ VERWEIGERUNG
-```
-
-Das war wichtig, weil eine Verweigerung **selbst** ein Interaktionssignal sein kann, während Garbage keinerlei Trait ableiten darf.
-
----
-
-# 5. Die erste große epistemische Trennung
-
-Dann kam die zentrale Forderung:
-
-Nicht einfach:
-
-```text
-"user mag kurze Antworten"
-```
-
-sondern:
-
-```text
-FREQUENCY
 +
-CONFIDENCE
+frozen base_identity
 ```
 
-getrennt.
+`actor_id` ist der stabile technische Identifikator.
 
-Beispiel:
+`base_identity` ist die eingefrorene Basisdefinition des Actors.
+
+Aktueller Zustand, Memory, Beziehungen, Beliefs, Disposition und historische Änderungen sind **nicht** Bestandteil der Identität.
+
+### Erlaubt
 
 ```text
-observations = 17
-matches      = 14
-confidence   = 0.82
+actor_id bleibt gleich
+state verändert sich
+relations verändern sich
+memory verändert sich
+beliefs verändern sich
+disposition verändert sich
+voice_delta verändert sich
 ```
 
-Und die entscheidende Einsicht:
+### Verboten
 
 ```text
-FREQUENCY ≠ CONFIDENCE
+state verändert sich
+→ actor_id wechseln
+
+emergent state verändert sich
+→ base_identity automatisch überschreiben
 ```
 
-Eine Beobachtung kann häufig sein, während wir trotzdem unsicher sind, was sie bedeutet.
+### Fallback
 
-Damit entstand implizit die Kette:
+Fehlt `actor_id` oder eine gültige frozen `base_identity`, darf kein bestehender Actor rekonstruiert werden.
+
+Der Zustand wird als nicht eindeutig identifiziert behandelt.
+
+### Fehlerstatus
+
+`IDENTITY_UNRESOLVED`
+
+### Replay
+
+Gleicher `actor_id` + gleiche frozen `base_identity` + gleiche gültige Historie müssen denselben Actor referenzieren.
+
+### Invariant
+
+```text
+STATE CHANGE ≠ IDENTITY CHANGE
+```
+
+### Verletzung
+
+Ein Actor wird nach einem Neustart neu erzeugt, nur weil seine aktuelle Persönlichkeit stark von der ursprünglichen Basis abweicht.
+
+---
+
+## DOKI-IDENT-002 — Frozen Base Identity
+
+### Definition
+
+Die Base Identity wird nach dem Freeze nicht stillschweigend durch spätere Evidenz ersetzt.
+
+Widersprechende Evidenz erzeugt keinen automatischen Retcon.
+
+### Erlaubt
+
+```text
+base_identity = A
+evidence später = widerspricht A
+→ contradiction / outdated exposure / neue Version
+```
+
+### Verboten
+
+```text
+evidence widerspricht A
+→ base_identity automatisch auf B setzen
+```
+
+### Fallback
+
+Ein Konflikt wird explizit als Konflikt persistiert.
+
+### Fehlerstatus
+
+`IDENTITY_CONFLICT`
+
+### Invariant
+
+```text
+EMERGENT STATE MUST NOT SILENTLY REWRITE FROZEN IDENTITY
+```
+
+---
+
+# OBSERVATION
+
+## DOKI-OBS-001 — Observation Definition
+
+Eine Observation ist der kleinste persistierbare, nachvollziehbare Grunddatensatz, auf den spätere Ableitungen zurückgeführt werden können.
+
+Eine Observation benötigt mindestens:
+
+```text
+observation_id
+provenance
+scope
+source
+observer
+observed_or_derived
+payload
+timestamp/order information
+```
+
+Nach erfolgreicher Persistierung ist die Observation unveränderlich.
+
+### Erlaubt
+
+```text
+Raw Input
+→ validieren
+→ Observation erzeugen
+→ persistieren
+```
+
+### Verboten
+
+```text
+Raw Input
+→ direkt als Memory / Belief / User Model behandeln
+```
+
+### Fallback
+
+Fehlt ein Pflichtbestandteil:
+
+```text
+PENDING
+oder
+REJECTED
+```
+
+aber nicht `OBSERVED`.
+
+### Fehlerstatus
+
+`OBSERVATION_INVALID`
+
+### Replay
+
+Dieselbe gültige Observation mit denselben Identitäts- und Provenance-Daten darf nicht als zweites Ereignis entstehen.
+
+### Invariant
+
+```text
+PERSISTED OBSERVATION = IMMUTABLE FACT RECORD
+```
+
+### Verletzung
+
+Ein LLM analysiert einen Chat-Abschnitt und schreibt direkt:
+
+```text
+user_trait = impatient
+```
+
+ohne vorherige persistierte Observation.
+
+---
+
+# PROVENANCE
+
+## DOKI-PROV-001 — Every Persistent Claim Has Origin
+
+Jede persistierte Information außer rein technischem transientem Runtime-Zustand muss auf eine Herkunft zurückgeführt werden können.
+
+Mindestens logisch erforderlich:
+
+```text
+source
+source_type
+observer
+subject
+scope
+cause / parent reference
+observed_or_derived
+```
+
+### Verboten
+
+```text
+claim exists
+but nobody can explain its origin
+```
+
+### Fallback
+
+Nicht ausreichend belegbare Information darf nicht als belastbare Information persistiert werden.
+
+### Fehlerstatus
+
+`PROVENANCE_MISSING`
+
+### Invariant
+
+```text
+NO ORIGIN → NO AUTHORITATIVE PERSISTENCE
+```
+
+---
+
+# INFERENCE
+
+## DOKI-INF-001 — Inference Is Gated
+
+Inference ist kein automatischer Folgeeffekt jeder Observation.
+
+Der erlaubte Weg lautet:
 
 ```text
 OBSERVATION
-   ↓
-PATTERN
-   ↓
-MATCH RATE
-   ↓
-CONFIDENCE
-   ↓
-USER MODEL
-```
-
-Und wir wollten **nicht** vorschnell behaupten:
-
-> „Der User ist so.“
-
----
-
-# 6. User Style wurde vom kosmetischen Profil zum Runtime-State
-
-Danach wurde ausdrücklich verworfen, User Style als einfaches Profil zu behandeln.
-
-Die Idee wurde:
-
-```text
-User Style
-= beobachtete, evidenzbasierte Anpassung
-```
-
-Also:
-
-```text
-USER-VERHALTEN
-      ↓
-PATTERN
-      ↓
-FREQUENCY
-+
-CONFIDENCE
-      ↓
-USER MODEL
-      ↓
-REACTION POLICY
-```
-
-Der User soll diese internen Zahlen **nicht** als Meta-Erklärung vorgesetzt bekommen.
-
-Sie beeinflussen das Verhalten.
-
----
-
-# 7. Q-Learning bekam eine sehr klare Rolle
-
-Dann wurde Q-Learning eingeordnet:
-
-```text
-Q-Learning
-= Variation / Anpassung
-
-NICHT
-= Wahrheit
-```
-
-Also:
-
-```text
-FACT / STATE
-      ↓
-   Wahrheit
-      │
-      ▼
-   Q-LAYER
-      ↓
-Reaktionspräferenz
-```
-
-Damit darf Q beispielsweise beeinflussen:
-
-```text
-direkter widersprechen
-vorsichtiger reagieren
-nachfragen
-mitgehen
-warnen
-provozieren
-```
-
-Aber nicht:
-
-```text
-"Diese Information ist wahr."
-```
-
-Das wurde mehrfach als harte Trennung formuliert.
-
----
-
-# 8. Zustimmung ≠ Überzeugung
-
-Dann kam dein Beispiel:
-
-> „Okay, wird gemacht. Aber denk an A+B. Das wird C oder D.“
-
-Daraus entstand eine wichtige soziale Semantik:
-
-```text
-USER DECISION
-≠
-AGENT BELIEF
-```
-
-Ein Agent darf also:
-
-```text
-deine Entscheidung akzeptieren
-```
-
-ohne:
-
-```text
-seine eigene Einschätzung zu verlieren
-```
-
-Somit können gleichzeitig existieren:
-
-```text
-user_decision = X
-agent_belief = Y
-```
-
-Der Agent kann X ausführen/akzeptieren und trotzdem Y für problematisch halten.
-
-Das wurde als wesentlich für die Glaubwürdigkeit des Akteurs erkannt.
-
----
-
-# 9. Doki soll nicht auf User-Turns warten
-
-Danach kam der Proaktivitätsgedanke.
-
-Doki darf:
-
-```text
-ungefragt sprechen
-```
-
-Beispiel:
-
-```text
-"Ach ja, ich lösch kurz deine State Machine, okay?"
-
-...
-
-"Nee, war Spaß, Kleiner."
-```
-
-Aber die sichtbare Prosa ist **nicht** selbst die technische Aktion.
-
-Daher:
-
-```text
-VORLAUT ≠ AUTORITÄT
-```
-
----
-
-# 10. Die wichtige Korrektur: Doki „imitiert“ Proaktivität nur oberflächlich
-
-Dann wurde präzisiert, wie das technisch aussehen soll.
-
-Für den User:
-
-```text
-wirkt spontan
-```
-
-Intern:
-
-```text
-RUNTIME
-↓
-nächster Intent
-↓
-Action Candidate
-↓
-Trigger / Timing
-↓
-Output
-```
-
-Also:
-
-```text
-STATE
- ↓
-INTENT
- ↓
-SCHEDULED ACTION
- ↓
-TRIGGER
- ↓
-OUTPUT
-```
-
-Die Runtime **bereitet den nächsten Schritt vor**, während der User nur das resultierende Verhalten sieht.
-
----
-
-# 11. Die Narratoren wurden neu verstanden
-
-Dann wurde sehr deutlich:
-
-Doki ist nicht bloß Moderator.
-
-```text
-DOKI = 1/3 NARRATOREN
-```
-
-Also:
-
-```text
-CHAT
- ├── Doki
- ├── Narrator B
- └── Narrator C
-```
-
-Sie leben dauerhaft in der Oberfläche und dürfen miteinander reagieren.
-
-Doki ist gleichzeitig:
-
-```text
-ORCHESTRATOR
-+
-EIGENER AKTEUR
-```
-
-aber **nicht Chef der anderen Persönlichkeiten**.
-
----
-
-# 12. Drei Narratoren sind nicht drei LLM-Aufrufe
-
-Dann kam die Runtime-Struktur:
-
-```text
-                 DOKI RUNTIME
-                       │
-          ┌────────────┼────────────┐
-          ▼            ▼            ▼
-        DOKI       NARRATOR B   NARRATOR C
-        STATE          STATE        STATE
-```
-
-Jeder hat eigenen:
-
-```text
-Identity
-State
-Memory
-Relations
-User relationship
-Disposition
-Voice Delta
-```
-
-Sie teilen eine Runtime, aber nicht dieselbe Identität.
-
----
-
-# 13. Narrative und technische Realität wurden getrennt
-
-Das wurde danach eine harte Grenze:
-
-```text
-REALITÄT
-   ↓
-OBSERVATION
-   ↓
-SECOND BRAIN
-   ↓
-DOKI BRAIN
-   ↓
-NARRATIVE
-```
-
-Nicht:
-
-```text
-NARRATIVE ───X──► technische Realität
-```
-
-Die Narratoren dürfen:
-
-```text
-lügen
-spielen
-provozieren
-Unsinn ankündigen
-sich irren
-Theater machen
-```
-
-ohne dadurch echte technische Konsequenzen auszulösen.
-
----
-
-# 14. Doki Brain und Second Brain wurden getrennt
-
-Dann wurde die Begriffsstruktur präzisiert:
-
-```text
-SECOND BRAIN
-= Kontext-/Arbeitsgedächtnis
-
-DOKI BRAIN
-= narrative / soziale Schicht
-```
-
-Das Second Brain ist also nicht das „persönliche Denken“ eines Narrators.
-
-Es ist die kontrollierte Zwischenstufe:
-
-```text
-beobachtet
-  ↓
-persistiert
-  ↓
-relevant?
-  ↓
-granuliert
-  ↓
-gezielter Kontext
-```
-
----
-
-# 15. Second Brain soll lokal granulieren
-
-Dann kam die API-Kosten-/429-Frage.
-
-Entscheidung:
-
-**Granulierung selbst braucht keine API.**
-
-```text
-EVENTS
- ↓
-NORMALIZE
- ↓
-DEDUP
- ↓
-DETERMINISTIC DELTA
- ↓
-CLUSTER
- ↓
-LAZY THRESHOLD
- ↓
-MEMORY
-```
-
-LLM kommt erst ganz am Ende als sprachlicher Renderer.
-
-Damit:
-
-```text
-LLM = Renderer
-nicht
-LLM = Memory
-```
-
----
-
-# 16. Jeder User-Input braucht Output
-
-Dann wurde eine harte UX-Regel hinzugefügt:
-
-```text
-JEDER INPUT
-   ↓
-lokale Zustandsänderung / Observation
-   ↓
-OUTPUT
-```
-
-Nie:
-
-```text
-"warte erst"
-"ich sammle noch"
-"kein Output nötig"
-```
-
-API-Ausfall darf also nicht zum sichtbaren Systemstillstand führen.
-
-```text
-API OK
-→ reichhaltiger Output
-
-API 429
-→ lokaler Fallback
-
-API DOWN
-→ lokaler Fallback
-```
-
----
-
-# 17. Der zentrale Doki-Hebel wurde dadurch schärfer
-
-Der erste Satz war:
-
-> Doki macht Agenten zu persistenten, rekonstruierbaren Akteuren statt zu einzelnen LLM-Aufrufen.
-
-Danach wurde klar, dass „persistenter Agent“ alleine **nicht genug** ist.
-
-Der eigentliche Doki-Kern ist:
-
-```text
-WARUM kenne ich diese Information?
-WOHER kommt sie?
-WEM gehört sie?
-WELCHEM SCOPE gehört sie?
-BEOBACHTET oder ABGELEITET?
-WARUM darf dieser Agent sie sehen?
-WAS darf daraus seinen Zustand verändern?
-```
-
-Das ist **Context Integrity + rekonstruierbare Agentenkontinuität**.
-
----
-
-# 18. Der Informationsfluss wurde dadurch formalisiert
-
-Aktuell ergibt sich:
-
-```text
-EVENT
- ↓
-IDENTITY
- ↓
-SCOPE
- ↓
-PROVENANCE
- ↓
-PERSISTENCE
- ↓
+    ↓
+[allowed inference rule?]
+    ↓
 INFERENCE
- ↓
-STATE
- ↓
-MEMORY
- ↓
-RELEVANCE
- ↓
-AGENT CONTEXT
- ↓
-REACTION
- ↓
-OUTPUT
+    ↓
+[allowed behavioral use?]
+    ↓
+BEHAVIORAL EFFECT
 ```
 
-Das ist bisher der stärkste gemeinsame Nenner unserer Diskussion.
+### Erlaubt
 
----
+Eine Inference darf nur entstehen, wenn:
 
-# 19. Observation, Pattern, Hypothesis wurden getrennt
+```text
+gültige Eingaben vorhanden
++
+definierte Regel / erlaubte Quelle
++
+Provenance auf Inputs
+```
 
-Wir haben explizit verhindert:
+### Verboten
 
 ```text
 Observation
- ↓
-Inference
- ↓
-Inference
- ↓
-Inference
- ↓
-"Der User ist halt so."
+→ freie semantische Expansion
+→ weitere Expansion
+→ Behaviour
 ```
 
-Stattdessen:
+ohne definierte Gates.
+
+### Fallback
+
+Bei unklarer oder ungültiger Grundlage bleibt die Information:
 
 ```text
 OBSERVED
- ↓
-PATTERN
- ↓
-HYPOTHESIS
- ↓
-STATE / POLICY
- ↓
-NARRATIVE
 ```
 
-Und dabei:
+oder wird als:
 
 ```text
-Observation Confidence
-≠
-Hypothesis Confidence
+INFERENCE_UNCERTAIN
+```
+
+geführt.
+
+### Fehlerstatus
+
+`INFERENCE_NOT_AUTHORIZED`
+
+### Invariant
+
+```text
+NO IMPLICIT INFERENCE ESCALATION
 ```
 
 ---
 
-# 20. Scope und Ownership wurden als getrennte Probleme erkannt
+## DOKI-INF-002 — Inference Chain
 
-Das war ein wichtiger Punkt.
+Eine Inference darf auf früheren Inferences aufbauen, solange jede Stufe ihre unmittelbaren Vorgänger und die verwendete Regel referenziert.
+
+Eine Kette darf nicht zu einer selbsttragenden Evidenzquelle werden.
+
+### Prinzip
 
 ```text
-SCOPE
-≠
-OWNERSHIP
+Observation
+  ↓
+Inference A
+  ↓
+Inference B
+  ↓
+Inference C
 ```
 
-Deshalb kamen:
+ist zulässig, solange die Kette bis zu belastbaren Observations zurückverfolgbar bleibt.
+
+Je weiter eine Aussage von den Observations entfernt ist, desto weniger darf bloße Kettenlänge ihre Belastbarkeit erhöhen.
+
+### Verboten
 
 ```text
-owner
-subject
-observer
-scope
+A wird mit B begründet
+B wird mit C begründet
+C wird mit A begründet
 ```
 
-Beispielsweise:
+### Fehlerstatus
+
+`INFERENCE_CHAIN_UNGROUNDED`
+
+### Invariant
 
 ```text
-owner: user
-subject: user
-observer: Doki
-scope: relationship
-```
-
-Das verhindert den „User-Model-Eimer“, in den irgendwann alles hineinfällt.
-
----
-
-# 21. Memory muss seine Herkunft behalten
-
-Auch nach Granulierung:
-
-```text
-memory
- ↓
-source
- ↓
-evidence
- ↓
-scope
- ↓
-confidence
-```
-
-Die Kernforderung:
-
-> Kompression darf Rekonstruktion erschweren, aber nicht unmöglich machen.
-
-Das heißt praktisch:
-
-```text
-SUMMARY
-   ↓
-muss auf ursprüngliche Evidenz zurückzeigen können
+DERIVED INFORMATION MUST REMAIN GROUNDED
 ```
 
 ---
 
-# 22. Memory → Prompt wurde als Autorisierungsproblem erkannt
+# CONFIDENCE
+
+## DOKI-CONF-001 — Confidence Domains
+
+Doki behandelt mindestens drei getrennte Confidence-Dimensionen:
+
+```text
+capture_confidence
+inference_confidence
+policy_relevance_confidence
+```
+
+Sie dürfen nicht automatisch ineinander überführt werden.
+
+### Bedeutung
+
+`capture_confidence`
+
+> Wie sicher ist die Erfassung des beobachteten Inputs?
+
+`inference_confidence`
+
+> Wie sicher ist die daraus gezogene Interpretation?
+
+`policy_relevance_confidence`
+
+> Wie sicher ist die Entscheidung, dass diese Information für die aktuelle Verwendung relevant genug ist?
+
+### Verboten
+
+```text
+high capture confidence
+→ automatically high inference confidence
+```
+
+### Invariant
+
+```text
+OBSERVATION CONFIDENCE ≠ INFERENCE CONFIDENCE
+```
+
+---
+
+# INDEPENDENT EVIDENCE
+
+## DOKI-EVID-001 — Independent Evidence
+
+Zwei Vorkommnisse gelten nur dann als unabhängige Evidenz, wenn sie auf unterschiedliche evidenzielle Ursprünge zurückgeführt werden können.
+
+Wiederholung desselben zugrundeliegenden Ereignisses zählt nicht automatisch als neue unabhängige Evidenz.
+
+### Beispiele
+
+```text
+ein Event
+→ drei gerenderte Nachrichten
+```
+
+ist **eine** Evidenzquelle.
+
+```text
+drei getrennte Interaktionen
+→ drei eigenständige Events
+```
+
+können **drei** Evidenzquellen sein.
+
+### Verboten
+
+```text
+frequency = 20
+→ evidence_strength = 20
+```
+
+ohne Prüfung der Unabhängigkeit.
+
+### Fallback
+
+Ist Unabhängigkeit nicht bestimmbar, wird die Evidenz konservativ als nicht unabhängig behandelt.
+
+### Fehlerstatus
+
+`EVIDENCE_INDEPENDENCE_UNKNOWN`
+
+### Invariant
+
+```text
+REPETITION ≠ INDEPENDENCE
+```
+
+---
+
+# SCOPE & VISIBILITY
+
+## DOKI-SCOPE-001 — Scope
+
+Information besitzt einen expliziten Scope.
+
+Der v0.1-Grundkatalog ist:
+
+```text
+global
+user
+actor
+relationship
+session
+conversation
+project
+task
+```
+
+Ein konkretes System darf weitere Scopes einführen, aber keinen bestehenden Scope semantisch umdeuten.
+
+### Verboten
+
+Eine Information wird nur aufgrund ihrer Existenz automatisch in einen weiteren Scope übertragen.
+
+### Fallback
+
+Ungeklärte Scope-Zuordnung:
+
+```text
+SCOPE_UNRESOLVED
+```
+
+und keine automatische Verbreitung.
+
+---
+
+## DOKI-SCOPE-002 — Scope Transfer
+
+Scope-Übertragung ist ein expliziter Vorgang.
+
+```text
+scope A
+→ [authorized transfer rule]
+→ scope B
+```
 
 Nicht:
 
 ```text
-relevant === true
+scope A
+→ system happens to reuse it in B
 ```
 
-sondern eher:
+### Invariant
+
+```text
+PERSISTENCE DOES NOT IMPLY SCOPE EXPANSION
+```
+
+---
+
+## DOKI-VIS-001 — Visibility
+
+Sichtbarkeit ist eine eigenständige Prüfung.
+
+```text
+EXISTS
+≠
+VISIBLE
+```
+
+Ein Actor darf eine Information nur verwenden, wenn:
+
+```text
+scope allows
++
+visibility allows
++
+ownership rules allow
++
+actor is permitted
+```
+
+### Verboten
+
+```text
+relevant = true
+→ therefore visible
+```
+
+### Fallback
+
+Bei unbekannter Autorisierung:
+
+```text
+NOT_VISIBLE
+```
+
+### Fehlerstatus
+
+`VISIBILITY_UNRESOLVED`
+
+---
+
+# MEMORY
+
+## DOKI-MEM-001 — Memory Is Derived Working Knowledge
+
+Memory ist keine zweite Wahrheit.
+
+```text
+Event Log = source of truth
+Observation = stabilized evidence
+Memory = derived working representation
+Narrative = presentation
+```
+
+Memory muss auf seine Quellen zurückführbar bleiben.
+
+### Verboten
+
+Eine Memory-Zusammenfassung ersetzt dauerhaft alle Quellen, sodass Rekonstruktion unmöglich wird.
+
+### Invariant
+
+```text
+MEMORY ≠ SOURCE OF TRUTH
+```
+
+---
+
+## DOKI-MEM-002 — Memory to Context Gate
+
+Memory wird nicht aufgrund bloßer Relevanz in einen Prompt übernommen.
+
+Die minimale Reihenfolge lautet:
 
 ```text
 MEMORY
  ↓
 SCOPE
  ↓
-OWNERSHIP
+VISIBILITY
  ↓
-AGENT VISIBILITY
+OWNERSHIP/PERMISSION
  ↓
 TASK RELEVANCE
  ↓
 CONFIDENCE
  ↓
-FRESHNESS / DECAY
+FRESHNESS / STATUS
  ↓
 BUDGET
  ↓
-PROMPT
+INCLUDED
 ```
 
-Die noch offene Frage ist:
+### Verboten
 
-**Welche Regel gewinnt bei Konflikten zwischen Relevanz und Kontextbudget?**
+```text
+high relevance
+→ bypass scope
+```
+
+### Budgetregel
+
+Wenn mehrere zulässige Memories das Budget überschreiten, entscheidet eine deterministische Prioritätsordnung.
+
+v0.1:
+
+```text
+1. authorization validity
+2. task relevance
+3. confidence
+4. freshness
+5. evidence support
+6. deterministic stable tie-break
+```
+
+Kein zufälliger Prompt-Selektor.
+
+### Exclusion Reason
+
+Jede nicht verwendete Memory muss mindestens einen maschinenlesbaren Ausschlussgrund besitzen:
+
+```text
+SCOPE_DENIED
+NOT_VISIBLE
+NOT_AUTHORIZED
+LOW_RELEVANCE
+LOW_CONFIDENCE
+STALE
+CONFLICTED
+BUDGET_EXCEEDED
+```
+
+### Invariant
+
+```text
+CONTEXT SELECTION MUST BE EXPLAINABLE
+```
 
 ---
 
-# 23. State darf nicht durch Prosa verändert werden
+# STATE MUTATION
 
-Eine besonders harte Trennung entstand:
+## DOKI-STATE-001 — Validated Mutation Only
+
+Keine abgeleitete Information darf allein durch ihre Existenz einen Zustand verändern.
+
+State Mutation benötigt einen validierten Runtime-Pfad.
 
 ```text
-PROSE
+input / observation / authorized inference
+        ↓
+validated transition
+        ↓
+state change
+```
+
+### Verboten
+
+```text
+memory exists
+→ therefore state changes
+```
+
+### Fehlerstatus
+
+`STATE_MUTATION_UNAUTHORIZED`
+
+### Invariant
+
+```text
+NO DIRECT MEMORY AUTHORITY
+```
+
+---
+
+# NARRATIVE
+
+## DOKI-NARR-001 — Narrative Has No Technical Authority
+
+Narrative Output ist Darstellung.
+
+Narrative darf:
+
+```text
+sprechen
+provozieren
+lügen
+spielen
+übertreiben
+Widerspruch ausdrücken
+```
+
+Narrative darf nicht:
+
+```text
+DB verändern
+State verändern
+Scope verändern
+Permissions verändern
+Agenten technisch blockieren
+Runtime-Regeln verändern
+```
+
+### Harte Richtung
+
+```text
+REALITY
+   ↓
+OBSERVATION
+   ↓
+SECOND BRAIN
+   ↓
+NARRATIVE
+   ↓
+CHAT
+```
+
+Nicht:
+
+```text
+CHAT / NARRATIVE
    X
    ↓
-STATE
+TECHNICAL REALITY
 ```
 
-Narrative Output ist kein Zustands-Input.
-
-Wenn ein Agent sagt:
-
-> „Ich bin jetzt wütend.“
-
-darf dadurch nicht automatisch:
+### Invariant
 
 ```text
-anger += 1
-```
-
-entstehen.
-
-State braucht einen echten Runtime-Grund / ein Event.
-
----
-
-# 24. Persönlichkeit wird aus Basis + Entwicklung gebaut
-
-Das aktuelle Modell:
-
-```text
-BASE IDENTITY
-        +
-CURRENT STATE
-        +
-RELATIONSHIP
-        +
-USER MODEL
-        +
-RECENT EVENTS
-        ↓
-DISPOSITION
-        ↓
-VOICE DELTA
-        ↓
-OUTPUT
-```
-
-Dabei:
-
-```text
-BASE VOICE
-≠
-CURRENT VOICE
-```
-
-Die Stimme bleibt erkennbar, aber der Zustand verschiebt ihre Ausdrucksweise.
-
----
-
-# 25. Scheduler für die drei Narratoren
-
-Dann wurde für Parallelität eine eigene Schicht identifiziert.
-
-Nicht einfach:
-
-```text
-RNG = wer redet?
-```
-
-sondern:
-
-```text
-NARRATIVE SCHEDULER
-```
-
-mit ungefähr dieser Reihenfolge:
-
-```text
-CAUSE
- ↓
-MUSEUM BREAK
- ↓
-SCREEN-TIME BALANCE
- ↓
-USER BIAS
- ↓
-SEEDED RNG
- ↓
-NARRATOR
-```
-
-Die drei wichtigen Kräfte waren:
-
-```text
-CAUSE
-= Wer hat gerade einen echten Grund?
-
-BALANCE
-= Hat jemand ohne Grund zu viel Bühne?
-
-USER BIAS
-= Gibt es eine evidenzbasierte Nutzerpräferenz?
-```
-
-RNG ist dann nur der deterministische Tie-Breaker unter zulässigen Kandidaten.
-
----
-
-# 26. „Museum Break“ entstand aus dem Problem der drei Stimmen
-
-Problem:
-
-```text
-Doki:
-"Das ist eine schlechte Idee."
-
-Narrator B:
-"Ich halte den Ansatz für problematisch."
-
-Narrator C:
-"Fantastisch. Noch eine Idee, die brennt."
-```
-
-Die offene Frage wurde:
-
-> Sind das drei eigenständige Reaktionen oder drei Varianten derselben Reaktion?
-
-Dafür braucht es eine **semantische Deduplizierung**.
-
-Noch nicht final entschieden ist:
-
-```text
-Was bedeutet "gleich"?
+PROSE ≠ EXECUTION
 ```
 
 ---
 
-# 27. „Grund“ für proaktives Sprechen
+# NARRATOR CAUSE
 
-Wir haben Kandidaten definiert wie:
+## DOKI-NARR-002 — Speaking Requires Cause
+
+Ein Narrator benötigt einen technischen Auslöser oder eine gültige geplante Aktion.
+
+Beispiele:
 
 ```text
 new_event
@@ -1010,305 +755,577 @@ memory_trigger
 scheduled_action
 ```
 
-Damit soll „ich hatte einfach Lust zu reden“ kein technisches Kriterium sein.
+Subjektive Motivation allein ist keine technische Autorisierung.
 
-Der konkrete Candidate darf natürlich trotzdem albern wirken.
+### Verboten
+
+```text
+"Agent feels like talking"
+→ unrestricted output
+```
+
+### Fallback
+
+Kein zulässiger Cause:
+
+```text
+NO_NARRATIVE_ACTION
+```
+
+Das System muss nicht künstlich reden.
 
 ---
 
-# 28. Replay wurde getrennt von Prosa verstanden
+# MUSEUM BREAK
 
-Aktueller Zielgedanke:
+## DOKI-SCHED-001 — Semantic Duplication
+
+Museum Break erkennt nicht primär gleichen Wortlaut.
+
+Zwei Kandidaten gelten als semantisch gleich, wenn sie denselben wesentlichen kommunikativen Inhalt repräsentieren, insbesondere:
 
 ```text
-SAME EVENTS
-   ↓
-SAME STATE
-   ↓
-SAME DISPOSITION
-   ↓
-SAME SCHEDULER DECISION
+intent
++
+claim / assertion
++
+target
++
+relevant cause
 ```
 
-Aber:
+Unterschiedlicher Stil zählt nicht als echte Diversität.
+
+### Beispiel
+
+```text
+A: "Das war eine schlechte Idee."
+
+B: "Ich halte diesen Einfall für ziemlich miserabel."
+
+C: "Genau. Das war dämlich."
+```
+
+Kann trotz drei Stimmen ein Museum Break sein.
+
+### Verboten
+
+```text
+wording differs
+→ diversity = true
+```
+
+### Fallback
+
+Kann semantische Gleichheit nicht zuverlässig festgestellt werden:
+
+```text
+DIVERSITY_UNKNOWN
+```
+
+und die Runtime darf nicht so tun, als sei Vielfalt bewiesen.
+
+### Invariant
+
+```text
+STYLE DIFFERENCE ≠ SEMANTIC DIVERSITY
+```
+
+---
+
+# SCHEDULER
+
+## DOKI-SCHED-002 — Candidate Selection
+
+Die Reihenfolge der Auswahl lautet:
+
+```text
+CAUSE
+ ↓
+VALID CANDIDATES
+ ↓
+MUSEUM CHECK
+ ↓
+SCREEN-TIME / BALANCE
+ ↓
+USER BIAS
+ ↓
+SEEDED RNG TIE-BREAK
+ ↓
+SELECT
+```
+
+User Bias darf die Kandidatengewichtung beeinflussen, aber nicht die technische Zulässigkeit aufheben.
+
+### Verboten
+
+```text
+user likes actor B
+→ actor B may speak without cause
+```
+
+### Zero Candidate
+
+```text
+kein zulässiger Kandidat
+→ no narrative action
+```
+
+### Tie
+
+Bei vollständig gleichwertigen Kandidaten:
+
+```text
+seeded deterministic RNG
+```
+
+### Invariant
+
+```text
+USER BIAS CANNOT CREATE AUTHORITY
+```
+
+---
+
+# USER DECISION / AGENT BELIEF
+
+## DOKI-REL-001 — Independent Social State
+
+Diese Zustände bleiben getrennt:
+
+```text
+user_decision
+agent_belief
+relationship_reaction
+future_consequence
+```
+
+Ein Actor darf einer User-Entscheidung folgen, ohne seine eigene Überzeugung zu ändern.
+
+### Erlaubt
+
+```text
+user_decision = A
+agent_belief = B
+accepted_decision = A
+```
+
+### Verboten
+
+```text
+user chose A
+→ agent_belief automatically becomes A
+```
+
+### Invariant
+
+```text
+USER DECISION ≠ AGENT BELIEF
+```
+
+---
+
+# Q LAYER
+
+## DOKI-Q-001 — Behavioral Bias Only
+
+Q-Learning ist eine Anpassungsschicht für Verhalten.
+
+Q darf:
+
+```text
+Reaktionspräferenzen
+Auswahltendenzen
+Prioritäten innerhalb erlaubter Actions
+```
+
+beeinflussen.
+
+Q darf nicht:
+
+```text
+Facts verändern
+Observations verändern
+Evidence erzeugen
+Scope verändern
+Permissions verändern
+Technical State autorisieren
+Truth bestimmen
+```
+
+### Harte Grenze
+
+```text
+FACT / STATE
+     ↓
+Q
+     ↓
+PREFERENCE
+```
+
+Nicht:
+
+```text
+Q
+ ↓
+TRUTH
+```
+
+### Invariant
+
+```text
+Q ≠ KNOWLEDGE AUTHORITY
+```
+
+---
+
+# OFFLINE / NO API
+
+## DOKI-RUNTIME-001 — Runtime Independence
+
+LLM-Ausfall ist kein Runtime-Ausfall.
+
+Bei:
+
+```text
+429
+offline
+provider unavailable
+timeout
+model unavailable
+```
+
+muss Doki weiterhin:
+
+```text
+Observations persistieren
+State verwalten
+Memory nutzen
+deterministische Regeln ausführen
+lokalen Output erzeugen
+```
+
+können.
+
+### Fallback
 
 ```text
 LOCAL OUTPUT
-→ exakt reproduzierbar
-
-LLM OUTPUT
-→ nicht zwingend bytegleich
 ```
 
-Also:
+statt:
 
-> Replaybarkeit gilt primär für die **Systementscheidung**, nicht zwingend für die sprachliche Oberfläche.
+```text
+NO OUTPUT
+```
+
+### Invariant
+
+```text
+LLM FAILURE ≠ DOKI FAILURE
+```
 
 ---
 
-# 29. Fehler und 429
+# LLM BOUNDARY
 
-Bisherige Grundrichtung:
+## DOKI-LLM-001 — LLM as Candidate Generator
+
+LLMs dürfen:
 
 ```text
-RUNTIME FAIL
-≠
-LLM FAIL
+interpretieren
+klassifizieren
+strukturieren
+formulieren
+Kandidaten erzeugen
 ```
 
-LLM darf ausfallen.
+Die Runtime entscheidet über:
 
-Die lokale Runtime soll weiterleben.
+```text
+validity
+authority
+scope
+persistence
+state mutation
+visibility
+behavioral effect
+```
 
-Das ist noch nicht vollständig spezifiziert für alle Fehlerklassen, aber die Grundrichtung ist sehr klar.
+### Pipeline
+
+```text
+LLM
+ ↓
+candidate
+ ↓
+validator
+ ↓
+runtime semantics
+ ↓
+persist / reject
+```
+
+### Verboten
+
+```text
+LLM output
+→ automatic authority
+```
+
+### Invariant
+
+```text
+LLM ≠ SOURCE OF TRUTH
+LLM ≠ STATE AUTHORITY
+```
 
 ---
 
-# 30. Doki vs. Falsify / Limen
+# REPLAY
 
-Dann kam die große Repository-/Plattformkorrektur:
+## DOKI-REPLAY-001 — Deterministic System Decisions
 
-```text
-DOKI
-= BASISPLATTFORM
-```
-
-und:
+Bei identischem:
 
 ```text
-FALSIFY = ADDON
-LIMEN    = ADDON
-...      = weitere ADDONS
+Input
+Event History
+State
+Rule Version
+Seed
+relevant configuration
 ```
 
-Die wichtigste Regel:
+müssen deterministische Systementscheidungen identisch rekonstruierbar sein.
+
+Dazu gehören mindestens:
 
 ```text
-ADDON darf Doki erweitern.
-
-Doki darf NICHT von einem bestimmten Addon abhängen.
+scope decisions
+visibility decisions
+state transitions
+validation results
+candidate eligibility
+scheduler decision
+memory inclusion/exclusion
+Q update
 ```
 
-Daher:
+### LLM-Prosa
+
+Byte-identische LLM-Prosa ist nicht zwingend Bestandteil des Replay-Vertrags.
+
+Replay muss jedoch erklären können, **warum** dieselbe Systementscheidung entstanden ist.
+
+### Invariant
 
 ```text
-DOKI standalone
-    │
-    ├── Falsify
-    ├── Limen
-    └── ...
+REPLAY REPRODUCES SYSTEM DECISION,
+NOT NECESSARILY MODEL WORDING
 ```
-
-Falsify ist **nicht der Sinn von Doki**.
-
-Es ist ein Beweis/Addon dafür, dass die Basis etwas kann.
 
 ---
 
-# 31. Doki soll als eigenes Repo existieren
+# RECONSTRUCTION
 
-Du wolltest Doki aus Falsify herauslösen:
+## DOKI-REPLAY-002 — Actor Reconstruction
 
-```text
-DOKI → eigenes Git Repo
-FALSIFY → eigenes Repo
-```
-
-Nicht nur zur Architektur, sondern auch für:
+Ein Actor muss später rekonstruierbar sein aus:
 
 ```text
-Backups
-saubere Historie
-Standalone-Marke
-klaren Scope
-keine Mischkonzepte
+actor_id
++
+frozen base_identity
++
+ordered event history
++
+state/rule version
++
+derived state
++
+memory provenance
++
+relationship state
 ```
 
-Das war der gewünschte unmittelbare Schnitt.
+Doki muss zumindest logisch erklären können:
+
+```text
+INPUT
+ ↓
+OBSERVATION
+ ↓
+INTERPRETATION
+ ↓
+STATE
+ ↓
+MEMORY
+ ↓
+CAUSE
+ ↓
+SELECTION
+ ↓
+OUTPUT
+```
+
+### Verboten
+
+```text
+final output exists
+but system cannot explain its causal path
+```
+
+### Invariant
+
+```text
+NO TRACEABLE PATH → NO FULL RECONSTRUCTION
+```
 
 ---
 
-# 32. Was der aktuelle Falsify-Bestand rückblickend gezeigt hat
+# EPISTEMIC UNCERTAINTY
 
-Beim Audit des echten Repos wurde deutlich:
+## DOKI-EPI-001 — Unknown Is a Valid State
 
-Der vorhandene `doki/`-Bereich enthält schon ziemlich viel:
+Epistemische Unsicherheit ist ein legitimer Zustand.
+
+Das System muss unterscheiden zwischen:
 
 ```text
-Observer
-Replay
-Pure State Logic
-Ensemble
-Narrator Catalog
-Prompt Compilation
-DB
-Memory
-Relationships
-Threads
-Perspectives
-Beliefs
-Conflicts
-Bridge
+KNOWN
+UNCERTAIN
+CONFLICTED
+UNKNOWN
 ```
 
-Die Pure-State-Machine ist bereits als bewusst getrennte, IO-freie Logik angelegt. Die aktuelle Doki-DB enthält bereits getrennte Observation-, History-, Character-, Memory- und Relationsebenen. Das ist eine starke Ausgangsbasis, aber noch kein Grund, die bestehende Falsify-Kopplung als Zielarchitektur zu übernehmen.
+### Verboten
 
-Besonders wichtig: Der aktuelle Stand koppelt Doki konzeptionell noch an Falsify-Contracts, Falsify-Events und Falsify-Konfiguration. Genau diese Dinge gehören beim Standalone-Rework **an die Addon-Grenze**, nicht in Doki Core.
+```text
+uncertain
+→ force certainty
+```
+
+### Erlaubt
+
+```text
+uncertain
+→ weaker influence
+→ alternatives remain open
+→ no automatic escalation
+```
+
+### Fehlerstatus
+
+Epistemische Unsicherheit ist nicht automatisch ein technischer Fehler.
+
+Sie besitzt einen eigenen semantischen Status.
+
+### Invariant
+
+```text
+UNKNOWN MUST NOT BECOME KNOWN BY DRIFT
+```
 
 ---
 
-# 33. Daraus ergibt sich der bisherige Doki-Nordstern
+# ABSOLUTE RED LINES
+
+Diese Regeln dürfen keine andere Schicht aufheben:
 
 ```text
-                         DOKI
-                STANDALONE BASIS
-┌──────────────────────────────────────────────────────────────┐
-│                                                              │
-│ Identity │ Scope │ Events │ Provenance │ State               │
-│ Memory │ Second Brain │ User Model │ Q/Policy                │
-│ Scheduler │ Agents │ Narrative │ Replay │ Output Runtime     │
-│                                                              │
-└──────────────────────────────┬───────────────────────────────┘
-                               │
-                         ADDON CONTRACT
-                    ┌──────────┼──────────┐
-                    ▼          ▼          ▼
-                 FALSIFY      LIMEN       ...
+BASE IDENTITY ≠ EMERGENT STATE
+
+FREQUENCY ≠ INDEPENDENT EVIDENCE
+
+CONFIDENCE TYPES ≠ interchangeable
+
+MEMORY ≠ SOURCE OF TRUTH
+
+NARRATIVE ≠ TECHNICAL AUTHORITY
+
+PROSE ≠ STATE MUTATION
+
+LLM ≠ SOURCE OF TRUTH
+
+Q ≠ TRUTH
+
+PERSISTENCE ≠ VISIBILITY
+
+PERSISTENCE ≠ SCOPE EXPANSION
+
+USER DECISION ≠ AGENT BELIEF
+
+USER BIAS ≠ AUTHORITY
+
+RELEVANCE ≠ PERMISSION
+
+API FAILURE ≠ RUNTIME FAILURE
 ```
 
-Und innerhalb des Systems:
+# Conformance Test
+
+Eine Doki-Implementierung ist erst dann konform, wenn sie für jeden oben definierten Regelbereich demonstrieren kann:
 
 ```text
-REALITY
+1. positive case
+2. forbidden case
+3. fallback
+4. error/status
+5. provenance / trace
+6. replay behavior
+7. invariant test
+```
+
+Erst danach ist die jeweilige Regel als implementiert zu betrachten.
+
+# Noch nicht eingefrorene Detailverträge
+
+Folgende Punkte bleiben bewusst offen und dürfen nicht durch Implementierungszufall entschieden werden:
+
+```text
+- exakter numerischer Confidence-Algorithmus
+- exakte Decay-Funktion
+- exakte Q State-/Action-Vektoren
+- exakte Voice-Delta-Achsen
+- exakte User-Model-Trait-Vokabel
+- exakte semantische Normalisierung für Museum Break
+- exakte Scope-Transfermatrix
+- exakte Memory-Prioritätsformel
+- exakte Inference-Tiefengrenze
+```
+
+Diese Punkte sind **OPEN ARCHITECTURE DECISIONS**, nicht freie Implementierungsentscheidungen.
+
+Ein Coder darf dort keine eigene Semantik erfinden und sie als Doki-Regel etablieren.
+
+# Oberstes Architekturprinzip
+
+```text
+RAW INPUT
    ↓
 OBSERVATION
    ↓
-SECOND BRAIN
+PROVENANCE
    ↓
-AGENT STATE
+VALIDATED DERIVATION
    ↓
-NARRATIVE BRAIN
+STATE / MEMORY
    ↓
-REACTION
+AUTHORIZED CONTEXT
+   ↓
+CANDIDATE
+   ↓
+RUNTIME DECISION
    ↓
 OUTPUT
 ```
 
----
-
-# 34. Die bisher wichtigsten festgezurrten Invarianten
+Der wichtigste Satz des Vertrags lautet:
 
 ```text
-1. BASE IDENTITY ≠ EMERGENT STATE
-
-2. FREQUENCY ≠ CONFIDENCE
-
-3. USER DECISION ≠ AGENT BELIEF
-
-4. NARRATIVE ≠ TECHNICAL AUTHORITY
-
-5. PROSE ≠ STATE MUTATION
-
-6. LLM ≠ SOURCE OF TRUTH
-
-7. MEMORY ≠ SECOND TRUTH
-
-8. SECOND BRAIN ≠ NARRATIVE BRAIN
-
-9. DOKI ≠ FALSIFY
-
-10. ADDON ≠ CORE DEPENDENCY
-
-11. LLM FAILURE ≠ RUNTIME FAILURE
-
-12. REPLAY ≠ zwingend identische LLM-Prosa
-
-13. EVERY USER INPUT → OUTPUT
-
-14. AGENT IDENTITY survives sessions
-
-15. INFERENCE needs provenance
+DOKI MAY DERIVE,
+BUT NOTHING DERIVED BECOMES AUTHORITY
+WITHOUT AN EXPLICIT RUNTIME RULE.
 ```
-
----
-
-# 35. Was noch NICHT entschieden ist
-
-Und hier würde ich jetzt **nicht so tun, als wäre es bereits geklärt**:
-
-```text
-IDENTITY
-  └─ exakte actor_id / persona_id Semantik
-
-OBSERVATION
-  └─ kleinste zulässige Beobachtungseinheit
-
-INFERENCE
-  └─ wer darf sie erzeugen?
-
-CONFIDENCE
-  └─ exakte Mathematik / mehrere Confidence-Arten?
-
-FREQUENCY
-  └─ Definition von unabhängigen Ereignissen / Spam
-
-SCOPE
-  └─ exakter Scope-Katalog und Vererbungsregeln
-
-MEMORY
-  └─ exakte Granulations- und Eviktionslogik
-
-CONFLICT
-  └─ Umgang mit widersprüchlichen Erinnerungen
-
-STATE
-  └─ exakte erlaubte Mutationsquellen
-
-SCHEDULER
-  └─ komplette Prioritäts- und Fallbackordnung
-
-MUSEUM BREAK
-  └─ Definition semantischer Duplikation
-
-PROACTIVE ACTION
-  └─ genaue Trigger-/Queue-Semantik
-
-PARALLEL NARRATORS
-  └─ echte Parallelität vs. deterministisch geordnete Ausführung
-
-VOICE DELTA
-  └─ Grenzen und Rückkehr zum Baseline
-
-429
-  └─ genaue lokale Output-Mechanik
-
-REPLAY
-  └─ was exakt reproduziert werden muss
-
-ERROR
-  └─ welche Zustände recovern / einfrieren / verwerfen
-```
-
-Der wichtigste Audit-Befund ist für mich:
-
-```text
-          VORHER
-Falsify als Zentrum
-       ↓
-Doki als Erweiterung
-
-          JETZT
-Doki als Basis
-       ↓
-persistente Akteure
-       ↓
-Context Integrity
-       ↓
-narratives Erlebnis
-
-Falsify / Limen / ...
-       ↓
-optionale Fähigkeiten
-```
-
-**Das ist die eigentliche konzeptionelle Bewegung des gesamten Gesprächs.**

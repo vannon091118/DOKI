@@ -74,12 +74,12 @@ test('accumulateEtats: 3 Events → akkumulierter State enthält knownEvents pro
   const state = accumulateEtats(events, { ladder: () => 'NARRATIVELY_RELEVANT' });
   // CLAIM-Event → ROLE_MAP.analysis (Squizzle) sieht e1
   assert.ok(state.characters['Squizzle']?.knownEvents.includes('e1'), 'Squizzle kennt CLAIM-Event');
-  // CHALLENGE mit wave='evil' → ROLE_MAP.attack (Buffy) + ROLE_MAP.analysis (Squizzle) sehen e2
-  assert.ok(state.characters['Buffy']?.knownEvents.includes('e2'), 'Buffy kennt evil-CHALLENGE');
+  // CHALLENGE mit wave='evil' → ROLE_MAP.attack (Argos) + ROLE_MAP.analysis (Squizzle) sehen e2
+  assert.ok(state.characters['Argos']?.knownEvents.includes('e2'), 'Argos kennt evil-CHALLENGE');
   assert.ok(state.characters['Squizzle']?.knownEvents.includes('e2'), 'Squizzle kennt evil-CHALLENGE');
   // recallCount stimmt
   assert.ok(state.characters['Squizzle']?.recallCount >= 2, 'Squizzle hat mind. 2 Recalls');
-  assert.ok(state.characters['Buffy']?.recallCount >= 1, 'Buffy hat mind. 1 Recall');
+  assert.ok(state.characters['Argos']?.recallCount >= 1, 'Argos hat mind. 1 Recall');
 });
 
 test('accumulateEtats: Replay-Determinismus — gleiche Events → identisches Ergebnis', () => {

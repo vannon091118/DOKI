@@ -4,8 +4,8 @@ import { CHARACTERS, CHARACTER_AXES, RELATIONSHIP_COUNT, EnsembleState } from '.
 import { allNarrators, allActiveNarrators, activeNarratorByName, narratorByIndex, narratorByName, REACTIVITY_AXES, ACTIVE_NARRATOR_NAMES, ROLE_MAP } from '../src/narrator-catalog.mjs';
 
 test('SnipWar narrator catalog keeps all 14 identities as ARCHIVE', () => {
-  assert.equal(allNarrators().length, 14);
-  for (let index = 1; index <= 14; index += 1) {
+  assert.equal(allNarrators().length, 13);
+  for (let index = 1; index <= 13; index += 1) {
     const narrator = narratorByIndex(index);
     assert.equal(narrator.index, index);
     assert.equal(narratorByName(narrator.name), narrator);
@@ -14,21 +14,24 @@ test('SnipWar narrator catalog keeps all 14 identities as ARCHIVE', () => {
 });
 
 test('RW-100: exactly the ACTIVE_NARRATOR_NAMES trio is materialized as ensemble characters', () => {
-  assert.deepEqual(ACTIVE_NARRATOR_NAMES, ['Buffy', 'Squizzle', 'Null']);
-  assert.deepEqual(CHARACTERS, ['Buffy', 'Squizzle', 'Null']);
-  assert.deepEqual(allActiveNarrators().map((n) => n.name), ['Buffy', 'Squizzle', 'Null']);
+  assert.deepEqual(ACTIVE_NARRATOR_NAMES, ['Squizzle', 'Null', 'Argos']);
+  assert.deepEqual(CHARACTERS, ['Squizzle', 'Null', 'Argos']);
+  assert.deepEqual(allActiveNarrators().map((n) => n.name), ['Squizzle', 'Null', 'Argos']);
   assert.equal(CHARACTERS.length, 3);
 });
 
 test('RW-100: active narrator lookup is fail-closed for archived identities', () => {
-  assert.equal(activeNarratorByName('Buffy').name, 'Buffy');
+  assert.equal(activeNarratorByName('Argos').name, 'Argos');
+  // Entfernte Plattform-Identität ist fail-closed (weder Archiv noch aktiv):
+  assert.throws(() => narratorByName('Buffy'), /Unknown/);
+  assert.throws(() => activeNarratorByName('Buffy'), /not active|Unknown/);
   assert.throws(() => activeNarratorByName('Thinker'), /not active/);
   assert.throws(() => activeNarratorByName('NichtExistiert'), /not active|Unknown/);
 });
 
 test('RW-100: ROLE_MAP carries the event-routing roles — no wired narrator strings', () => {
   assert.equal(ROLE_MAP.analysis, 'Squizzle');
-  assert.equal(ROLE_MAP.attack, 'Buffy');
+  assert.equal(ROLE_MAP.attack, 'Argos');
   assert.equal(ROLE_MAP.userProxy, 'Vannon');
   for (const value of Object.values(ROLE_MAP)) {
     // Rollen müssen im ARCHIV bekannt sein (aber nicht zwingend aktiv —
@@ -39,13 +42,13 @@ test('RW-100: ROLE_MAP carries the event-routing roles — no wired narrator str
 
 test('character personality is static while runtime state is mutable', () => {
   const ensemble = new EnsembleState();
-  const before = structuredClone(ensemble.profile('Buffy'));
-  ensemble.recordRecall('Buffy', 'obs-1');
-  ensemble.setKnowledge('Buffy', 'fix', true);
-  ensemble.remember('Buffy', { memoryId: 'mem-1', observationId: 'obs-1' });
-  ensemble.applyEmotion('Buffy', { curiosity: 0.4 });
-  assert.deepEqual(ensemble.profile('Buffy'), before);
-  assert.equal(ensemble.characters.get('Buffy').recallCount, 1);
+  const before = structuredClone(ensemble.profile('Argos'));
+  ensemble.recordRecall('Argos', 'obs-1');
+  ensemble.setKnowledge('Argos', 'fix', true);
+  ensemble.remember('Argos', { memoryId: 'mem-1', observationId: 'obs-1' });
+  ensemble.applyEmotion('Argos', { curiosity: 0.4 });
+  assert.deepEqual(ensemble.profile('Argos'), before);
+  assert.equal(ensemble.characters.get('Argos').recallCount, 1);
 });
 
 test('active characters materialize the complete directed relationship graph', () => {
@@ -62,5 +65,5 @@ test('active characters materialize the complete directed relationship graph', (
   assert.equal(ensemble.profile('Thinker').name, 'Thinker');
   assert.equal(ensemble.characters.get('Thinker'), undefined);
   assert.throws(() => ensemble.recordRecall('Thinker', 'obs-x'), /Unknown DOKI character/);
-  assert.throws(() => ensemble.applyRelationshipDelta('Buffy', 'Buffy', { trust: 0.1 }));
+  assert.throws(() => ensemble.applyRelationshipDelta('Argos', 'Argos', { trust: 0.1 }));
 });

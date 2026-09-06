@@ -16,11 +16,11 @@ test('observer is exactly-once for repeated terminal material', () => {
 });
 
 test('ensemble materializes directed active-character graph without self edges', () => {
-  assert.deepEqual(CHARACTERS, ['Buffy', 'Squizzle', 'Null']);
+  assert.deepEqual(CHARACTERS, ['Squizzle', 'Null', 'Argos']);
   assert.equal(RELATIONSHIP_COUNT, 6);
   const ensemble = new EnsembleState();
   assert.equal(ensemble.relationships.size, 6);
-  assert.throws(() => ensemble.applyRelationshipDelta('Buffy', 'Buffy', { trust: 0.1 }));
+  assert.throws(() => ensemble.applyRelationshipDelta('Argos', 'Argos', { trust: 0.1 }));
 });
 
 test('15th narrator cannot acquire technical authority', () => {

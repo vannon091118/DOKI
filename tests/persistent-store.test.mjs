@@ -17,13 +17,13 @@ test('persistent observer store survives close and reopen', () => {
     assert.equal(first.appendObservation(event), true);
     assert.equal(first.appendObservation(event), false);
     assert.equal(first.readCursor(), 'obs_001');
-    first.putCharacterState({ characterId: 'Buffy', state: { recallCount: 1 } });
-    first.putMemory({ memoryId: 'mem_1', characterId: 'Buffy', memoryKind: 'event', memory: { text: 'scan complete' } });
-    assert.equal(first.putMemory({ memoryId: 'mem_2', characterId: 'Buffy', memoryKind: 'event', memory: { text: 'updated' } }), 'mem_1');
-    first.putRelationship({ fromCharacter: 'Buffy', toCharacter: 'Thinker', state: { trust: 0.7 } });
+    first.putCharacterState({ characterId: 'Argos', state: { recallCount: 1 } });
+    first.putMemory({ memoryId: 'mem_1', characterId: 'Argos', memoryKind: 'event', memory: { text: 'scan complete' } });
+    assert.equal(first.putMemory({ memoryId: 'mem_2', characterId: 'Argos', memoryKind: 'event', memory: { text: 'updated' } }), 'mem_1');
+    first.putRelationship({ fromCharacter: 'Argos', toCharacter: 'Thinker', state: { trust: 0.7 } });
     first.putThread({ threadId: 'thread_1', state: { status: 'open' } });
-    first.putPerspective({ characterId: 'Buffy', topicKey: 'scan', state: { stance: 'positive' } });
-    first.appendBelief({ beliefId: 'belief_1', characterId: 'Buffy', topicKey: 'scan', belief: { value: true }, evidence: ['obs_001'] });
+    first.putPerspective({ characterId: 'Argos', topicKey: 'scan', state: { stance: 'positive' } });
+    first.appendBelief({ beliefId: 'belief_1', characterId: 'Argos', topicKey: 'scan', belief: { value: true }, evidence: ['obs_001'] });
     first.putConflict({ conflictId: 'conflict_1', conflict: { kind: 'none' } });
     first.appendHistoryRun({ historyId: 'history_1', baseCursorId: 'obs_001', inputDigest: 'in', ruleVersion: 'test/v1', stateDigest: 'state' });
     first.appendNarrativeOutput({ outputId: 'out_1', historyId: 'history_1', narratorId: 'narrator-15', promptDigest: 'prompt', messageText: 'Done.' });
@@ -55,7 +55,7 @@ test('persistent store rejects self relationships', () => {
   const path = join(dir, 'doki.sqlite');
   try {
     const store = createPersistentStore({ path });
-    assert.throws(() => store.putRelationship({ fromCharacter: 'Buffy', toCharacter: 'Buffy', state: {} }));
+    assert.throws(() => store.putRelationship({ fromCharacter: 'Argos', toCharacter: 'Argos', state: {} }));
     store.close();
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
