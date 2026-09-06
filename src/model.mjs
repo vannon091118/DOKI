@@ -1,6 +1,5 @@
 import { digestJson } from './hash.mjs';
 import { DEFAULT_MAX_RESWITCH } from './contracts.mjs';
-import { activeThinkerRunExists } from './falsify-adapter.mjs';
 
 function now() { return new Date().toISOString(); }
 
@@ -50,4 +49,3 @@ export function resolveSwitches(decisions = []) {
 }
 
 export function config(env = process.env) { return apiConfig(env); }
-export { activeThinkerRunExists };

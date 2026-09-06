@@ -1,9 +1,9 @@
 import { digestJson } from './hash.mjs';
 import { buildHistory, correlation } from './history.mjs';
 import { compilePrompt, detectInstructionLikeData } from './prompt.mjs';
-import { callModel, modelForAction, activeThinkerRunExists } from './model.mjs';
+import { callModel, modelForAction } from './model.mjs';
 import { RUNTIME_VERSION, checkAdapterContract } from './contracts.mjs';
-import { inspectEventContinuity, readSnapshot, sharedKeyWindowOpen, adapterContract as defaultAdapterContract } from './falsify-adapter.mjs';
+import { inspectEventContinuity, readSnapshot, sharedKeyWindowOpen, activeThinkerRunExists, adapterContract as defaultAdapterContract } from './falsify-adapter.mjs';
 import { buildNarratorContext } from './narrator-context.mjs';
 import { narrateOnce } from './thinker-orchestrator.mjs';
 import { etats } from './etats.mjs';
@@ -161,8 +161,21 @@ function deriveEnsembleAndRelevance(snapshot, report) {
 }
 
 
-async function narrate({report,snapshot,history,updateId,env,falsifyDb,dokiDb,modelCall=callModel}) {
-  if (!sharedKeyWindowOpen(falsifyDb, snapshot.loop_event.id) || activeThinkerRunExists(falsifyDb)) {
+// K4-Ablösung: das Slot-Gate ist ein PORT. slotGate.windowOpen() entscheidet,
+// ob DOKI denken darf — Default: falsify-Adapter (Legacy-Wahrheit "DOKI denkt
+// nur, wenn FalsifyMe schläft"). Andere Systeme injizieren ihr eigenes Gate;
+// der Runtime-Code kennt nur die Port-Signatur, keine FM-Tabellen mehr.
+function defaultSlotGate(falsifyDb) {
+  return {
+    windowOpen: (eventId) =>
+      sharedKeyWindowOpen(falsifyDb, eventId) && !activeThinkerRunExists(falsifyDb),
+    source: 'falsify-adapter',
+  };
+}
+
+async function narrate({report,snapshot,history,updateId,env,falsifyDb,dokiDb,modelCall=callModel,slotGate}) {
+  const gate = slotGate ?? defaultSlotGate(falsifyDb);
+  if (!gate.windowOpen(snapshot.loop_event.id)) {
     return fallback({ promptDigest:null, narratorContext:null }, 'DOKI wartet auf den freien Thinker-Slot.');
   }
   const { ensemble, relevance, stateKey } = deriveEnsembleAndRelevance(snapshot, report);
@@ -181,15 +194,16 @@ async function narrate({report,snapshot,history,updateId,env,falsifyDb,dokiDb,mo
     dokiDb.prepare('INSERT INTO anomalies(update_id,kind,detail,created_at) VALUES(?,?,?,?)').run(updateId,'INSTRUCTION_LIKE_DATA','Narrative input contained instruction-like data; authority unchanged.',now());
     return fallback({ ...prompt, narratorContext }, 'DOKI hat instruction-like Daten erkannt.');
   }
-  if (!sharedKeyWindowOpen(falsifyDb, snapshot.loop_event.id) || activeThinkerRunExists(falsifyDb)) return fallback({ ...prompt, narratorContext }, 'DOKI Kill-Switch ausgelöst.');
+  if (!gate.windowOpen(snapshot.loop_event.id)) return fallback({ ...prompt, narratorContext }, 'DOKI Kill-Switch ausgelöst.');
   try {
     const result = await narrateOnce({
       prompt: prompt.body,
-      callThinker: (body) => modelCall(body, modelForAction('RED', env), {
+      callThinker: (body, callOpts = {}) => modelCall(body, modelForAction('RED', env), {
         env,
-        shouldAbort: () => !sharedKeyWindowOpen(falsifyDb, snapshot.loop_event.id) || activeThinkerRunExists(falsifyDb),
+        shouldAbort: () => !gate.windowOpen(snapshot.loop_event.id),
+        ...callOpts,
       }),
-      shouldRun: () => sharedKeyWindowOpen(falsifyDb, snapshot.loop_event.id) && !activeThinkerRunExists(falsifyDb),
+      shouldRun: () => gate.windowOpen(snapshot.loop_event.id),
     });
     if (result.status === 'DEFERRED') return fallback({ ...prompt, narratorContext }, 'DOKI wartet auf den freien Thinker-Slot.');
     dokiDb.prepare('INSERT OR REPLACE INTO rotation_state(id,window_key,reswitch_count,call_count,token_count,updated_at) VALUES(1,?,?,?,?,?)').run(snapshot.loop_event.job_id,0,1,0,now());
@@ -208,7 +222,7 @@ async function narrate({report,snapshot,history,updateId,env,falsifyDb,dokiDb,mo
 // (meldet seine Version selbst); Tests/andere Quellen injizieren ihren eigenen
 // Adapter-Vertrag. Kein Env-Pin mehr — DOKIs Identität hängt an keinem fremden
 // Commit, aber fail-closed bleibt: unbekannte Version → UNAVAILABLE.
-export async function processEvent({falsifyDb,dokiDb,eventId,env=process.env,modelCall=callModel,adapterContract:adapterContractPort=defaultAdapterContract}) {
+export async function processEvent({falsifyDb,dokiDb,eventId,env=process.env,modelCall=callModel,adapterContract:adapterContractPort=defaultAdapterContract,slotGate}) {
   const contract=checkAdapterContract(adapterContractPort());
   if(!contract.ok){
     const updateId=updateIdFor(eventId);
@@ -223,7 +237,7 @@ export async function processEvent({falsifyDb,dokiDb,eventId,env=process.env,mod
     dokiDb.prepare('INSERT INTO observations(update_id,loop_event_id,job_id,scope_id,event_type,from_state,to_state,snapshot_json,snapshot_digest,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)').run(updateId,eventId,snapshot.loop_event.job_id,snapshot.loop_event.scope_id??null,snapshot.loop_event.event_type,snapshot.loop_event.from_state,snapshot.loop_event.to_state,JSON.stringify(snapshot),snapshotDigest,now());
     const history=buildHistory(dokiDb,snapshot); const report=makeReport(snapshot,history,updateId);
     dokiDb.prepare('INSERT INTO phase_reports(report_id,update_id,report_json,report_digest,created_at) VALUES(?,?,?,?,?)').run(report.report_id,updateId,JSON.stringify(report),report.report_digest,now());
-    const r=await narrate({report,snapshot,history,updateId,env,falsifyDb,dokiDb,modelCall});
+    const r=await narrate({report,snapshot,history,updateId,env,falsifyDb,dokiDb,modelCall,slotGate});
     const message={schema:'doki_message/v1',message_id:digestJson(updateId),update_ref:updateId,phase_report_ref:report.report_id,mode:r.mode,render_path:r.renderPath,reswitch_count:r.reswitchCount,narrator_ref:r.narratorContext?.contextDigest ?? null,body:r.body,evidence_refs:report.wave_refs,anomaly_refs:[],authority:'NONE'};
     dokiDb.prepare('INSERT INTO dialog_messages(message_id,update_id,message_json,created_at) VALUES(?,?,?,?)').run(message.message_id,updateId,JSON.stringify(message),now());
     dokiDb.prepare('UPDATE update_jobs SET status=\'DONE\',finished_at=? WHERE update_id=?').run(now(),updateId); return message;

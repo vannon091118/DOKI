@@ -55,7 +55,6 @@ test('K1 single schema-knower: only falsify-adapter.mjs touches falsify tables',
   const others = [
     'doki/src/runtime.mjs', 'doki/src/model.mjs', 'doki/src/db.mjs',
     'doki/src/bridge.mjs', 'doki/src/replay.mjs', 'doki/src/cli.mjs',
-    'doki/src/rotation.mjs', 'doki/src/falsify-reader.mjs',
     'doki/src/observer-store.mjs', 'doki/src/observer.mjs',
     'doki/src/ensemble-state.mjs', 'doki/src/etats.mjs',
     'doki/src/prompt.mjs', 'doki/src/signals.mjs', 'doki/src/contracts.mjs',
@@ -66,7 +65,7 @@ test('K1 single schema-knower: only falsify-adapter.mjs touches falsify tables',
       `${file} darf kein falsify-Schema-SQL enthalten (nur falsify-adapter.mjs)`);
     // Handle-BAU nur im Adapter: außerhalb darf node:sqlite nur für DOKI-DBs
     // benutzt werden (cli.mjs/replay.mjs importieren den Adapter legitimerweise).
-    if (!['doki/src/rotation.mjs', 'doki/src/falsify-reader.mjs', 'doki/src/db.mjs'].includes(file)) {
+    if (file !== 'doki/src/db.mjs') {
       assert.doesNotMatch(src, /new DatabaseSync\([^)]*falsify/i, `${file} baut keinen falsify-Handle`);
       assert.doesNotMatch(src, /from '\.\/db\.mjs'.*openReadOnlyFalsifyDb/, `${file} importiert den falsify-Handle nicht mehr aus db.mjs`);
     }
@@ -77,8 +76,7 @@ test('K2 vocabulary isolation: wire names only in signals (catalog) + vocabulary
   const wireNames = ['job', 'finding', 'handoff', 'scope_auto', 'thinker_start', 'thinker_done'];
   for (const file of [
     'doki/src/runtime.mjs', 'doki/src/bridge.mjs', 'doki/src/ensemble-state.mjs',
-    'doki/src/etats.mjs', 'doki/src/model.mjs', 'doki/src/rotation.mjs',
-    'doki/src/falsify-reader.mjs', 'doki/src/prompt.mjs', 'doki/src/cli.mjs',
+    'doki/src/etats.mjs', 'doki/src/model.mjs', 'doki/src/prompt.mjs', 'doki/src/cli.mjs',
     'doki/src/replay.mjs', 'doki/src/observer.mjs', 'doki/src/observer-store.mjs',
   ]) {
     const src = readFileSync(resolve(ROOT, file), 'utf8');
