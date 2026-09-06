@@ -8,6 +8,13 @@ inklusive Schmutz, Halbfertigkeit und Falsify-Resten — als Planungsbasis.
 
 ## 1. Struktur (IST)
 
+**Remote-Cutover (2026-09-06):** eigenes Remote
+`https://github.com/vannon091118/DOKI` (origin). `main` = dieser Stand
+(`dae5010`, Force-Push mit Lease). Der ALTE Juni-Stand ("14 Charaktere
+erzählen Git-Commits als Geschichten", e9a5ba5) ist als
+`legacy-2026-06` auf dem Remote gesichert — Archiv, keine Basis neuer
+Arbeit. Branch lokal: `main` (von `master` umbenannt).
+
 - Eigenes Git-Repo seit 2026-09-06 (Init-Commit 585c38, 42 Dateien).
   Vorher Anhang des FalsifyMe-Repos (dort Commit 0ff3b59 = Auszug).
 - `src/` = 26 Module, `tests/` = 12 Suiten (74 Tests, alle grün,
